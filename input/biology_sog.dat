@@ -1,0 +1,37 @@
+3.3e-05  0.95e-6  0.1  1.0e-06  1.2e-6  1.0e-3 !post-thesis values
+
+
+3.3e-05  0.95e-6  0.1  1.0e-06  1.2e-6  1.0e-3 !thesis values
+
+micro%R=1.5 d-1, converted to 1.7361e-05 s-1. from olson, 1980
+micro%sigma= 1.12e-5  increasing delays bloom, decreasing makes bloom early
+micro%gamma=0.1 from Jeffrey p.53 increasing makes bloom all background
+				  decreasing makes bloom noisy and late
+micro%Rm=0.013d-1 converted to 1.5046e-07s-1 from Jeffrey p.53
+	OR 12% of Rmax=2.0833e-06. decrease: incr. overall growth
+				 increase RM, delay bloom
+micro%M_z=0.02d-1 converted to 2.3148e-07 from Jeffrey p.53
+	 = 0.6 d-1, Wong et al 96 in Saanich inlet. = 6.9444e-06 during bloom
+micro%inhib=1e-4; changing this has little effect
+
+Maite: respiration is between 10-20% of Rmax, photoexudation is 30% (up to 50%) of assimilated carbon excreted during photosynthesis
+
+  
+!micro%R, micro%sigma, micro%gamma, micro%Rm, micro%M_z 
+!nano%R, nano%sigma, nano%gamma, nano%Rm, nano%M_z,Csources, C_types, D_bins,d_prey,prey,zpreyues:
+! micro%R = 1.D-05, nano%R =  5.D-06,  micro%sigma = 9.6D-06
+!
+!1.25 1/day (1.45D-05) R Fasham, 1995
+!2.0 1/day (2.3D-05)  R Evans/Parslow 1985
+!0.14 m^2/W/day (1.62D-06) sigma F, 1995 
+!0.083 m^2/W/day (9.6D-07) sigma Evans/Parslow 1985
+!Rm 0.125 (1.45D-06) F, 1995
+!0.1 ==> 0.001  gamma ==> 0. try 0.1 or 0.3
+!M_z 0.05 (5.79D-07) F, 1995m =, 0.02 d^-1
+!M_z is now a fraction of total arriving Cevent(1)%nauplii  ==> zero for nano and 0.1 for diatoms
+
+
+
+3.16e-06  1.12e-6 0.1 3.16e-06 5.0e-7 5.0e-4  !these are the experimental parameters
+
+

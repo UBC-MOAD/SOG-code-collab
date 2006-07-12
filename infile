@@ -1,0 +1,79 @@
+"writefile1"	"output/phys0506_nh4.dat"	"write file"
+"writefile2"	"output/bio0506_nh4.dat"	"write file"
+"inputfile"	"input/nov04-05.dat"		"input file"
+"ctd_in"	"input/ctd_in/SG0414004.str"	"ctd file"	
+"profile_out1"	"profiles/KI_pro0506_nh4"	"profile"
+"profile_out2"	"profiles/profile0506_nh4"	"profile"
+
+
+"writefile1"	"output/phys0315.dat"		"write file"
+"writefile2" 	"output/bio0315.dat"		"write file"
+"inputfile"	"input/input1.dat"		"input file"
+"ctd_in"	"input/ctd_in/SG0314004.str"	"ctd file"	
+"profile_out1"	"profiles/KI_pro0315"		"profile"
+"profile_out2"	"profiles/profile0315"		"profile"
+
+
+
+
+
+"writefile1"	"output/phys0305_nh4.dat"	"write file"
+"writefile2"	"output/bio0305_u3.dat"	"write file"
+"inputfile"	"input/nov02-03.dat"		"input file"
+"ctd_in"	"input/ctd_in/SG0208004.str"	"ctd file"	
+"profile_out1"	"profiles/KI_pro0305_nh4"	"profile"
+"profile_out2"	"profiles/profile0305_u3"	"profile"
+
+"writefile1"	"output/phys0406_nh4.dat"	"write file"
+"writefile2"	"output/bio0406_u3.dat"	"write file"
+"inputfile"	"input/nov03-04.dat"		"input file"
+"ctd_in"	"input/ctd_in/SG0320004.str"	"ctd file"	
+"profile_out1"	"profiles/KI_pro0406_nh4"	"profile"
+"profile_out2"	"profiles/profile0406_u3"	"profile"
+
+
+
+"writefile1" 	"output/phys0201_nh4.dat"	"write file"
+"writefile2" 	"output/bio0201_nh4.dat"	"write file"
+"inputfile"	"input/nov01-02.dat"		"input file"
+"ctd_in"	"input/ctd_in/SG0101004.str"	"ctd file"	
+"profile_out1"	"profiles/KI_pro0201_nh4"	"profile"
+"profile_out2"	"profiles/profile0201_nh4"	"profile"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"writefile" 	"output/daily0209_long.dat"	"write file"
+"inputfile"	"input/long.dat"		"input file"
+"ctd_in"	"input/ctd_in/SG0101004.str"	"ctd file"	
+"profile_out"	"profiles/profile0209_long"	"profile"
+
+"writefile"	"output/daily1996.dat"		"write file"
+"inputfile"	"input/nov02-03.dat"		"input file"
+"ctd_in"	"input/ctd_in/SG0208004.str"	"ctd file"	
+"profile_out"	"profiles/profile1996"		"profile"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
