@@ -1,230 +1,246 @@
-MODULE initial_sog
-      
-      USE surface_forcing
-       
-      DOUBLE PRECISION, PARAMETER::To = 5. +273.15, & !!Large1996, &!22.000 + 273.15000   
-                             So = 32.70, & ! Large199635.0 !32.8, &!PSU  !32.70 Large1996
-                             Uo = 0.0,     & ! m/s
-                             Vo = 0.0,     &   ! m/s
-                             ho = 0.0, & !20.0, &  !19.0,     & ! 
-                             !hm = 80.0, & !(28.0)Sep, Aug (19.0), Oct (38.0), Nov (58.0), Dec(80.0)
-                             hm =  2.0, & !28, & !75.0, & !Large1996
-                             hm2 = 2.0, & !Large et al 1994
-                             To2 = 6.0 + 273.15, & !Large et al 1994
-                             hs = 100.0, & !Large1996
-                             hs2 = 150.0, & !Large1996
-                             !Tm = 6.7, & !(12.8)Sep, Aug (12.9), Oct (10.8), Nov (8.1), Dec(6.7)
-                             Tm = 4.0 + 273.15, & !Large1996
-                             Zd = 200., & !Large1996 (m)
-                             Ss = 33.70, & !Large1996 
-                             Sd = 33.80, &  !Large1996
-                             dh_t = 20.0, & !(32.0)Sep, Aug (41.0), Oct (32.0), Nov (32.0), Dec(20.0)
-                             dT_t = 2.4, & !(6.2)Sep, Aug (6.7), Oct (4.9), Nov (2.8), Dec (2.4)
-                             h_t = 100.0, & !(60.0)Sep, Aug (60.0), Oct (70.0), Nov (90.0), Dec (100.0)
-                             Div_T_M = 0.0, & !!Bottom flux  1/s
-                             Div_S_M = 0.0, &  
-                             Div_U_M = 0.0, &
-                             Div_V_M = 0.0, &                             
-                             P_micro = 0.3D-3, &
-                             P_nano = 2.6D-3, &
-                             Z_micro = 1.6D-3, &
-                             Deto =  1.D-3, &
-                             NOo =  0.21, &
-                             NOs = 0.49, &
-                             NOd = 0.52, &
-                             NHo = .5D-3 
+! $Id$
 
-      character*80	str1	
+module initial_sog
 
-      CONTAINS
+  use surface_forcing
 
-          SUBROUTINE initial_mean (Ui,Vi,Ti,Si,Pi,Ni,Detritus,hi,ut,vt,pbx,pby,d,D_bins,xx)       
-              TYPE(gr_d),INTENT(IN)::d
-              TYPE(nutrient), INTENT(OUT)::Ni
-              TYPE(snow), DIMENSION(D_bins), INTENT(IN OUT)::Detritus
-              TYPE(plankton), INTENT(OUT)::Pi 
-              TYPE(prop), INTENT(OUT)::Ui, Vi, Ti, Si, ut,vt
-              double precision, dimension (d%M),intent(out):: pbx,pby
-              INTEGER, INTENT(IN)::D_bins
-              DOUBLE PRECISION,INTENT(OUT)::hi !h%new
-              INTEGER:: i, ii, imax, xx !xx=cruise_id
-              DOUBLE PRECISION,dimension (3854):: NN
-              Ui%new(1) = Uo
-              Vi%new(1) = Vo
-              Si%new(1) = So
-              Ti%new(1) = To 
-              Pi%micro%new(1) = P_micro
-              Ni%O%new(1) = NOo
-              Ni%H%new(1) = NHo
+  implicit none
 
-!-----detritus loop added march 2006---------------------------------
+  DOUBLE PRECISION, PARAMETER::To = 5. +273.15, & !!Large1996, &!22.000 + 273.15000   
+       So = 32.70, & ! Large199635.0 !32.8, &!PSU  !32.70 Large1996
+       Uo = 0.0,     & ! m/s
+       Vo = 0.0,     &   ! m/s
+       ho = 0.0, & !20.0, &  !19.0,     & ! 
+       !hm = 80.0, & !(28.0)Sep, Aug (19.0), Oct (38.0), Nov (58.0), Dec(80.0)
+  hm =  2.0, & !28, & !75.0, & !Large1996
+       hm2 = 2.0, & !Large et al 1994
+       To2 = 6.0 + 273.15, & !Large et al 1994
+       hs = 100.0, & !Large1996
+       hs2 = 150.0, & !Large1996
+       !Tm = 6.7, & !(12.8)Sep, Aug (12.9), Oct (10.8), Nov (8.1), Dec(6.7)
+  Tm = 4.0 + 273.15, & !Large1996
+  Zd = 200., & !Large1996 (m)
+       Ss = 33.70, & !Large1996 
+       Sd = 33.80, &  !Large1996
+       dh_t = 20.0, & !(32.0)Sep, Aug (41.0), Oct (32.0), Nov (32.0), Dec(20.0)
+       dT_t = 2.4, & !(6.2)Sep, Aug (6.7), Oct (4.9), Nov (2.8), Dec (2.4)
+       h_t = 100.0, & !(60.0)Sep, Aug (60.0), Oct (70.0), Nov (90.0), Dec (100.0)
+       Div_T_M = 0.0, & !!Bottom flux  1/s
+       Div_S_M = 0.0, &  
+       Div_U_M = 0.0, &
+       Div_V_M = 0.0, &                             
+       P_micro = 0.3D-3, &
+       P_nano = 2.6D-3, &
+       Z_micro = 1.6D-3, &
+       Deto =  1.D-3, &
+       NOo =  0.21, &
+       NOs = 0.49, &
+       NOd = 0.52, &
+       NHo = .5D-3 
 
-  OPEN(UNIT = 44, FILE = "input/initial_Detritus.dat",STATUS = "OLD", &
-       ACTION = "READ")
+  character*80	str1	
 
-             DO i = 1, d%M+1
-                READ (44,*) Detritus(1)%D%new(i),Detritus(2)%D%new(i)
-             END DO 
+contains
 
-  CLOSE(44)
+  subroutine initial_mean (Ui, Vi, Ti, Si, Pi, Ni, Detritus, hi, ut, vt, &
+       pbx, pby, d, D_bins, xx)       
 
+    type(gr_d), intent(in) :: d
+    type(nutrient), intent(out) :: Ni
+    type(snow), dimension(D_bins), intent(in out) :: Detritus
+    type(plankton), intent(out) :: Pi 
+    type(prop), intent(out) :: Ui, Vi, Ti, Si, ut,vt
+    double precision, dimension(d%M), intent(out) :: pbx,pby
+    integer, intent(in) :: D_bins
+    double precision, intent(out) :: hi !h%new
+    integer xx           ! cruise_id
 
-  OPEN(UNIT = 49, FILE = "input/NH4.dat",STATUS = "OLD", &
-       ACTION = "READ")
+    integer :: i, j      ! loop index
+    integer :: ii, imax  ! unused loop indices
+    ! Get rid of this hard-coded dimension!
+    double precision, dimension (3854) :: NN
+    ! Place holders for reading CTD data file
+    integer :: dum1
+    real :: depth, dumc, dumt, dump, dumo
 
-             DO i = 1, d%M+1
-                READ (49,*) Ni%H%new(i)
-             END DO 
+    Ui%new(1) = Uo
+    Vi%new(1) = Vo
+    Si%new(1) = So
+    Ti%new(1) = To 
+    Pi%micro%new(1) = P_micro
+    Ni%O%new(1) = NOo
+    Ni%H%new(1) = NHo
 
-  CLOSE(49)
+    !-----detritus loop added march 2006---------------------------------
 
+    OPEN(UNIT = 44, FILE = "input/initial_Detritus.dat",STATUS = "OLD", &
+         ACTION = "READ")
 
-!             DO i = 1, D_bins
-!                 IF (i < D_bins) THEN
-!                    Detritus(i)%D%new = Deto
-!                 ELSE
-!                    Detritus(i)%D%new = zero !0.
-!                 END IF
-!              END DO 
+    DO i = 1, d%M+1
+       READ (44,*) Detritus(1)%D%new(i),Detritus(2)%D%new(i)
+    END DO
+
+    CLOSE(44)
 
 
+    OPEN(UNIT = 49, FILE = "input/NH4.dat",STATUS = "OLD", &
+         ACTION = "READ")
+
+    DO i = 1, d%M+1
+       READ (49,*) Ni%H%new(i)
+    END DO
+
+    CLOSE(49)
 
 
-!---biology jan 10 2005---------------------------------
-
-            DO i = 2, d%M+1   
-               IF (d%d_g(i) <= hm) THEN  !Large1996  March 1960 initial profile        
-
-                   Pi%micro%new(i) = P_micro
-                   Ni%H%new(i) = NHo
-                ELSE       !IF (d%d_g(i) <= Zd) THEN
-                   Pi%micro%new(i) = 0.
-                   Ni%H%new(i) = 0.
-               END IF
-                IF (d%d_g(i) <= hs) THEN  !Large1996
-                   Ni%O%new(i) = NOo
-                ELSE IF (d%d_g(i) > hs .AND. d%d_g(i) <= hs2) THEN
-                   Ni%O%new(i) = NOo + (NOs-NOo)/(hs2-hs)*(d%d_g(i)-hs)
-                ELSE !IF (d%d_g(i) <= Zd) THEN
-                   Ni%O%new(i) = NOs + (NOd-NOs)/(Zd-hs2)*(d%d_g(i)-hs2)
-                END IF         
-
-                Ui%new(i) = Uo
-                Vi%new(i) = Vo
-               
-          END DO
-
-              Pi%micro%new(d%M+1) = zero !0.
-              Ni%O%new(d%M+1) = NOd
-              Ni%H%new(d%M+1) = zero !0.
-              Detritus%D%new(d%M+1) = zero ! 0. (DON ==> Detritus(1), need some deep ocean value)
-              Detritus(2)%D%new(d%M+1) =  zero !Detritus(2)%D%new(d%M) !PON needs a deep ocean value
+    !             DO i = 1, D_bins
+    !                 IF (i < D_bins) THEN
+    !                    Detritus(i)%D%new = Deto
+    !                 ELSE
+    !                    Detritus(i)%D%new = zero !0.
+    !                 END IF
+    !              END DO 
 
 
 
 
+    !---biology jan 10 2005---------------------------------
 
- !               open (66,file="input/nitratetest.dat")
-            open (66,file="input/nitrate.dat")
-              
-              do i=1,3854
-                 read (66,*) NN(i)
-              enddo
+    DO i = 2, d%M+1   
+       IF (d%d_g(i) <= hm) THEN  !Large1996  March 1960 initial profile        
 
-              close (66)
+          Pi%micro%new(i) = P_micro
+          Ni%H%new(i) = NHo
+       ELSE       !IF (d%d_g(i) <= Zd) THEN
+          Pi%micro%new(i) = 0.
+          Ni%H%new(i) = 0.
+       END IF
+       IF (d%d_g(i) <= hs) THEN  !Large1996
+          Ni%O%new(i) = NOo
+       ELSE IF (d%d_g(i) > hs .AND. d%d_g(i) <= hs2) THEN
+          Ni%O%new(i) = NOo + (NOs-NOo)/(hs2-hs)*(d%d_g(i)-hs)
+       ELSE !IF (d%d_g(i) <= Zd) THEN
+          Ni%O%new(i) = NOs + (NOd-NOs)/(Zd-hs2)*(d%d_g(i)-hs2)
+       END IF
 
-            if (xx==1) then 
-                 Ni%O%new=NN(1:82)
-              else
-                 Ni%O%new=NN(82*(xx-1)+1:82*(xx-1)+82)
-              endif       
+       Ui%new(i) = Uo
+       Vi%new(i) = Vo
 
+    END DO
 
-
-
-!---end biology------------------------------------------ 
-
-              open (5,file="infile")
-
-              str1=getpars("ctd_in",1)
-                           
-              OPEN (46,file=str1,STATUS="OLD")
-              do i=1,d%M+1
-                 read (46,*) dum1,depth,Ti%new(i),dumc,Pi%micro%new(i),dumt,dump,dumo,Si%new(i)   
-                 Ti%new(i) = Ti%new(i)+273.15
-                 Pi%micro%new(i) = Pi%micro%new(i)
-              enddo
-
-              Ti%new(0) = Ti%new(1)  !Surface
-              Si%new(0) = Si%new(1)  !Boundary
-              Pi%micro%new(0) = Pi%micro%new(1)
-              Ni%O%new(0) = Ni%O%new(1)
-              Ni%H%new(0) = Ni%H%new(1)
-
-              ! assuming dz = 0.5
-              do i=d%M+1,2,-1
-                 j=i/2
-                 if (j*2.eq.i) then
-                    Ti%new(i)= Ti%new(j)
-                     Si%new(i)= Si%new(j)
-                   Pi%micro%new(i)=Pi%micro%new(j)
-                 else
-                    Ti%new(i) = Ti%new(j)*0.5+Ti%new(j+1)*0.5
-                   Si%new(i) = Si%new(j)*0.5+Si%new(j+1)*0.5
-                   Pi%micro%new(i) = Pi%micro%new(j)*0.5+Pi%micro%new(j+1)*0.5
-                endif
-              enddo
-
-              
-              hi = hm  !Large1996 !ho 
-
-           
-              close(46)
-                                !If the bottom fluxes are fixed, use the following 
-                                !tp reevaluate M+1 values:
-
-              Vi%new(0) = Vi%new(1)  !Conditions
-              Ui%new(0) = Ui%new(1)
-
-!            initialize ut and vt
-              do i=1,d%M
-                 ut%new(i) = 0.
-                 vt%new(i) = 0.
-                 pbx(i) = 0.
-                 pby(i) = 0.
-              enddo
-
-              !PON%new(1:M) = Pi%micro%new(1:M)+ Detritus(1)%D%new(1:M)+ Detritus(2)%D%new(1:M)
-
-          END SUBROUTINE initial_mean
- 
-	character*80 function getpars(name,flag)
-
-	character*(*)	name
-	integer		flag
-
-	integer		lnblnk
-
-	character	label*16, s*80, desc*50
+    Pi%micro%new(d%M+1) = zero !0.
+    Ni%O%new(d%M+1) = NOd
+    Ni%H%new(d%M+1) = zero !0.
+    Detritus(1)%D%new(d%M+1) = zero ! 0. (DON ==> Detritus(1), need some deep ocean value)
+    Detritus(2)%D%new(d%M+1) =  zero !Detritus(2)%D%new(d%M) !PON needs a deep ocean value
 
 
-	read(5,*) label, s, desc
 
-	if (name .ne. label) then
-		print*, "GETPARS: Expecting ", name, " but got ", label(1:lnblnk(label))
-		stop
-	end if
 
-	if (flag .ne. 0) then
-     		write(*,'(a50," = ",a)') desc(1:lnblnk(desc)), s(1:lnblnk(s))
 
-	getpars = s
-        
-	return
-        end if
-        end
+    !               open (66,file="input/nitratetest.dat")
+    open (66,file="input/nitrate.dat")
 
-     
+    do i=1,3854
+       read (66,*) NN(i)
+    enddo
+
+    close (66)
+
+    if (xx==1) then 
+       Ni%O%new=NN(1:82)
+    else
+       Ni%O%new=NN(82*(xx-1)+1:82*(xx-1)+82)
+    endif
+
+
+
+
+    !---end biology------------------------------------------ 
+
+    open (5,file="infile")
+
+    str1=getpars("ctd_in",1)
+
+    OPEN (46,file=str1,STATUS="OLD")
+    do i=1,d%M+1
+       read (46,*) dum1,depth,Ti%new(i),dumc,Pi%micro%new(i),dumt,dump,dumo,Si%new(i)   
+       Ti%new(i) = Ti%new(i)+273.15
+       Pi%micro%new(i) = Pi%micro%new(i)
+    enddo
+
+    Ti%new(0) = Ti%new(1)  !Surface
+    Si%new(0) = Si%new(1)  !Boundary
+    Pi%micro%new(0) = Pi%micro%new(1)
+    Ni%O%new(0) = Ni%O%new(1)
+    Ni%H%new(0) = Ni%H%new(1)
+
+    ! assuming dz = 0.5
+    ! Interpolate CTD data values for grid points between measurements?
+    do i = d%M+1, 2, -1
+       j = i / 2
+       if (j * 2 == i) then
+          Ti%new(i) = Ti%new(j)
+          Si%new(i) = Si%new(j)
+          Pi%micro%new(i) = Pi%micro%new(j)
+       else
+          ! This looks like a job for a arith_mean function
+          Ti%new(i) = Ti%new(j) * 0.5 + Ti%new(j+1) * 0.5
+          Si%new(i) = Si%new(j) * 0.5 + Si%new(j+1) * 0.5
+          Pi%micro%new(i) = Pi%micro%new(j) * 0.5 + Pi%micro%new(j+1) * 0.5
+       endif
+    enddo
+
+
+    hi = hm  !Large1996 !ho 
+
+
+    close(46)
+    !If the bottom fluxes are fixed, use the following 
+    !tp reevaluate M+1 values:
+
+    Vi%new(0) = Vi%new(1)  !Conditions
+    Ui%new(0) = Ui%new(1)
+
+    !            initialize ut and vt
+    do i=1,d%M
+       ut%new(i) = 0.
+       vt%new(i) = 0.
+       pbx(i) = 0.
+       pby(i) = 0.
+    enddo
+
+    !PON%new(1:M) = Pi%micro%new(1:M)+ Detritus(1)%D%new(1:M)+ Detritus(2)%D%new(1:M)
+
+  END SUBROUTINE initial_mean
+
+  character*80 function getpars(name,flag)
+
+    character*(*)	name
+    integer		flag
+
+    integer		lnblnk
+
+    character	label*16, s*80, desc*50
+
+
+    read(5,*) label, s, desc
+
+    if (name .ne. label) then
+       print*, "GETPARS: Expecting ", name, " but got ", label(1:lnblnk(label))
+       stop
+    end if
+
+    if (flag .ne. 0) then
+       write(*,'(a50," = ",a)') desc(1:lnblnk(desc)), s(1:lnblnk(s))
+
+       getpars = s
+
+       return
+    end if
+  end function getpars
+
+
 END MODULE initial_sog
 
 
