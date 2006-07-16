@@ -21,7 +21,7 @@ subroutine define_Ri_b_sog(d, hh, surf_h, Bb, Uu, Vv, dens, Rib, &
  
   ! Local variables:
   double precision, dimension(0:d%M+1) :: test_vector, test_vector2
-  integer :: yy
+  integer :: yy, ymin
   double precision ::Ribmin
 
   surf_h%new = ep*hh%new
