@@ -1,6 +1,8 @@
       SUBROUTINE TRIDAG(A,B,C,R,U,N) !!A,B,C are N dimensional vectors
+      INTEGER NMAX
       PARAMETER (NMAX=300)
       DOUBLE PRECISION A,B,C,R,U,GAM,BET
+      INTEGER N, J
       DIMENSION GAM(NMAX),A(N),B(N),C(N),R(N),U(N)
       IF (B(1) .EQ. 0.) PAUSE 'TRIDAG: rewrite eqns.'
       BET=B(1)
