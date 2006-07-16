@@ -1,22 +1,27 @@
-SUBROUTINE write_physical_sog(unow,vnow,euphotic)
+! $Id$
+! $Source$
 
-  USE mean_param
-  USE declarations
-  USE surface_forcing
+subroutine write_physical_sog(unow, vnow, euphotic)
+! Output physical results.
 
-  IMPLICIT NONE
+  use mean_param
+  use declarations
+  use surface_forcing
 
-double precision :: unow,vnow      
-TYPE(entrain), INTENT(IN)::euphotic !euphotic%depth, euphotic%i 
+  implicit none
 
- 100  FORMAT(1X, E15.8)
- 200  FORMAT(1X, I10)
+  ! Arguments:
+  double precision :: unow, vnow      
+  type(entrain), intent(in) :: euphotic !euphotic%depth, euphotic%i 
 
-  INTEGER::jj,years,sizerun,jj_day,day_count
-  DOUBLE PRECISION::dh_dt_hour,Ks_ml,I_ml_hour
+  ! Local variables:
+  integer :: jj, years, sizerun, jj_day, day_count
+  double precision :: dh_dt_hour, Ks_ml, I_ml_hour
+  integer :: isusan, nsal, isal(6), tsal
+  double precision :: sal(6), dsal(6)
 
-  INTEGER::isusan,nsal,isal(6),tsal
-  DOUBLE PRECISION::sal(6),dsal(6)
+100 format(1X, E15.8)
+200 format(1X, I10)
 
   nsal = 6
   sal(1) = 28.75
@@ -42,17 +47,19 @@ TYPE(entrain), INTENT(IN)::euphotic !euphotic%depth, euphotic%i
         dsal(jj) = isal(jj)
      endif
   enddo
-  
-write (293,111) time/3600.,h%new, stress%u%new, stress%v%new,t%new(0),s%new(0),u%new(1),Q_t(0),K%t%all(1),I_par(0),density%new(0),Q_n(1)*100000.
-  
-write (295,111) time/3600.,P%micro%new(0),N%O%new(0),N%H%new(0),Detritus(1)%D%new(0),Detritus(2)%D%new(0),Detritus(3)%D%new(0),f_ratio(1)
-  
 
-111 format (17(x,f10.4))   
-      
+111 format (17(1x,f10.4))   
+  write(293, 111) time/3600., h%new, stress%u%new, stress%v%new,t%new(0), &
+       s%new(0), u%new(1), Q_t(0), K%t%all(1), I_par(0), density%new(0), &
+       Q_n(1)*100000.
 
-open(294,file="output/PON_flux.dat")
-write(294,*) NHflux_200,NOflux_200,PONflux_200
+  write(295, 111) time/3600., P%micro%new(0), N%O%new(0), N%H%new(0), &
+       Detritus(1)%D%new(0), Detritus(2)%D%new(0), Detritus(3)%D%new(0), &
+       f_ratio(1)
+
+
+  open(294,file="output/PON_flux.dat")
+  write(294,*) NHflux_200,NOflux_200,PONflux_200
 
   jj_day = 0
 
@@ -79,22 +86,22 @@ write(294,*) NHflux_200,NOflux_200,PONflux_200
         EXIT
      END IF
   END DO
-!   OPEN(UNIT = 160, FILE = "output/UV_20res.dat",STATUS = "REPLACE", &
-!       ACTION = "WRITE")
+  !   OPEN(UNIT = 160, FILE = "output/UV_20res.dat",STATUS = "REPLACE", &
+  !       ACTION = "WRITE")
 
   IF (year == 1972 .AND. day_time <= 3600. .AND. day_time > 0.) THEN
      WRITE(160,100)REAL(U_ten),REAL(V_ten)
   END IF
 
   !Data to save at each timestep
-!  OPEN(UNIT = 152, FILE = "output/dhdt_ml_hourly_20res.dat",STATUS = "REPLACE", &
-!       ACTION = "WRITE")
-!  OPEN(UNIT = 153, FILE = "output/Ks_ml_hourly_20res.dat",STATUS = "REPLACE", &
-!       ACTION = "WRITE")
+  !  OPEN(UNIT = 152, FILE = "output/dhdt_ml_hourly_20res.dat",STATUS = "REPLACE", &
+  !       ACTION = "WRITE")
+  !  OPEN(UNIT = 153, FILE = "output/Ks_ml_hourly_20res.dat",STATUS = "REPLACE", &
+  !       ACTION = "WRITE")
   OPEN(UNIT = 154, FILE = "output/Ipar_ml_hourly_20res.dat",STATUS = "REPLACE", &
        ACTION = "WRITE")
-!  OPEN(UNIT = 155, FILE = "output/time_hourly_20res.dat",STATUS = "REPLACE", &
-!       ACTION = "WRITE")
+  !  OPEN(UNIT = 155, FILE = "output/time_hourly_20res.dat",STATUS = "REPLACE", &
+  !       ACTION = "WRITE")
 
   IF (year == 1972 .AND. (day == 100 .OR. day == 101)) THEN
      dh_dt_hour = (h_m%new-h_m%old)/dt
@@ -173,14 +180,14 @@ write(294,*) NHflux_200,NOflux_200,PONflux_200
      Ku_dec = Ku_dec/DBLE(cntp_dec) 
      Ks_dec = Ks_dec/DBLE(cntp_dec) 
      Kt_dec = Kt_dec/DBLE(cntp_dec) 
-!  OPEN(UNIT = 156, FILE = "output/phys_mar_20res.dat",STATUS = "REPLACE", &
-!       ACTION = "WRITE")
-!  OPEN(UNIT = 157, FILE = "output/phys_jun_20res.dat",STATUS = "REPLACE", &
-!       ACTION = "WRITE") 
-!  OPEN(UNIT = 158, FILE = "output/phys_sep_20res.dat",STATUS = "REPLACE", &
-!       ACTION = "WRITE")
-!  OPEN(UNIT = 159, FILE = "output/phys_dec_20res.dat",STATUS = "REPLACE", &
-!       ACTION = "WRITE")
+     !  OPEN(UNIT = 156, FILE = "output/phys_mar_20res.dat",STATUS = "REPLACE", &
+     !       ACTION = "WRITE")
+     !  OPEN(UNIT = 157, FILE = "output/phys_jun_20res.dat",STATUS = "REPLACE", &
+     !       ACTION = "WRITE") 
+     !  OPEN(UNIT = 158, FILE = "output/phys_sep_20res.dat",STATUS = "REPLACE", &
+     !       ACTION = "WRITE")
+     !  OPEN(UNIT = 159, FILE = "output/phys_dec_20res.dat",STATUS = "REPLACE", &
+     !       ACTION = "WRITE")
      WRITE(156,100)REAL(T_mar),REAL(S_mar),REAL(U_mar),REAL(V_mar),REAL(Ku_mar),REAL(Ks_mar),REAL(Kt_mar)
      WRITE(157,100)REAL(T_jun),REAL(S_jun),REAL(U_jun),REAL(V_jun),REAL(Ku_jun),REAL(Ks_jun),REAL(Kt_jun)
      WRITE(158, 100)REAL(T_sep),REAL(S_sep),REAL(U_sep),REAL(V_sep),REAL(Ku_sep),REAL(Ks_sep),REAL(Kt_sep)
@@ -197,7 +204,7 @@ write(294,*) NHflux_200,NOflux_200,PONflux_200
      Uten_o(day_count) = Uten_o(day_count)+ stress%u%new !Uten_o(day_count) + U_ten 
      Vten_o(day_count) = Vten_o(day_count)+stress%v%new !Vten_o(day_count) + V_ten  !
      UVten_o(day_count) = UVten_o(day_count) + &
-     SQRT(stress%u%new**2.0 +stress%v%new**2.0) !UVten_o(day_count) +  Large_data(data_point_papmd)%Uten
+          SQRT(stress%u%new**2.0 +stress%v%new**2.0) !UVten_o(day_count) +  Large_data(data_point_papmd)%Uten
      !
      Qflux(day_count) = Qflux(day_count) + Q_t(0)  !W/m^2
      Fflux(day_count) = Fflux(day_count) + w%s(0)  !Ft*S_o/rho_o  (PSU*m/s)
@@ -234,8 +241,8 @@ write(294,*) NHflux_200,NOflux_200,PONflux_200
            IparML(xx) = IparML(xx)/DBLE(p_cnt(xx))
         END IF
      END DO
-  OPEN(UNIT = 150, FILE = "output/physical_o_20res.dat",STATUS = "REPLACE", &
-       ACTION = "WRITE")
+     OPEN(UNIT = 150, FILE = "output/physical_o_20res.dat",STATUS = "REPLACE", &
+          ACTION = "WRITE")
      WRITE(150,100)REAL(SST(1:sizerun)),REAL(SSS(1:sizerun)),REAL(hm_avg(1:sizerun))
      WRITE(150,100)REAL(Ipar_o(1:sizerun)),REAL(Uten_o(1:sizerun)),REAL(Vten_o(1:sizerun)),REAL(UVten_o(1:sizerun))
      WRITE(150,100)REAL(Qflux(1:sizerun)),REAL(Fflux(1:sizerun)),REAL(KsML(1:sizerun)),REAL(IparML(1:sizerun))
@@ -251,12 +258,6 @@ write(294,*) NHflux_200,NOflux_200,PONflux_200
      Fflux(1:sizerun) = 0.
      KsML(1:sizerun) = 0.
      IparML(1:sizerun) = 0.
-  END IF
+  end if
 
-END SUBROUTINE write_physical_sog
-
-
-
-
-
-
+end subroutine write_physical_sog
