@@ -1,15 +1,21 @@
-MODULE reaction
+! $Id$
+! $Source$
 
-  USE mean_param
-  USE surface_forcing
-  USE pdf
+module reaction
 
-  IMPLICIT NONE
-  
-CONTAINS
-  
-  SUBROUTINE Copepod_growth(PZ,size,Zoo,species,cevent,mm,Csources,C_types,waste,urea1,bin,bin_tot)
+  use mean_param
+  use surface_forcing
+  use pdf
 
+  implicit none
+
+contains
+
+  subroutine Copepod_growth(PZ, size, Zoo, species, cevent, mm, Csources, &
+       C_types, waste, urea1, bin, bin_tot)
+    ! *** What's it do?
+
+    ! Arguments:
     INTEGER, INTENT(IN)::size,Csources,C_types,bin,bin_tot !size of PZ
     TYPE(gr_d), INTENT(IN)::mm !grid
     DOUBLE PRECISION, DIMENSION(size), INTENT(IN)::PZ
@@ -20,7 +26,7 @@ CONTAINS
     DOUBLE PRECISION, DIMENSION(mm%M), INTENT(IN OUT)::urea1  !N%urea%new
 
     INTEGER::j, k, x,total_prey,bin_tot2
-       
+
     DOUBLE PRECISION, DIMENSION(prey+d_prey,mm%M,bin,Csources)::graze
     DOUBLE PRECISION, DIMENSION(mm%M,bin,Csources)::ingest
     DOUBLE PRECISION, DIMENSION(bin)::excrete
@@ -30,7 +36,7 @@ CONTAINS
     DOUBLE PRECISION, DIMENSION(mm%M)::Pmicro,Zmicro,Pnano,SPN,totalprey
     DOUBLE PRECISION, DIMENSION(Csources,bin)::weight  !species(yy)%mature_pdf(1:Cevent(yy)%length)%wt_avg
     DOUBLE PRECISION, DIMENSION(Csources,mm%M)::Zcopepod !species(yy)%n(1:M)*species(yy)%Ntot = 
-                                                         !species(yy)%Z%new(1:M)
+    !species(yy)%Z%new(1:M)
 
     total_prey = prey+d_prey   !Note: prey = 2, d_prey = 1, D_bins = 3, zprey = 3:   
     p_bin_size = 1.0  
@@ -54,12 +60,12 @@ CONTAINS
 
        IF (species(k)%Ntot > small .AND. Cevent(k)%on /= 0) THEN
 
-!!define ingestion averaged over z given n(z) (eg. of [P] for wt_j: 
-       !!!= < (delta-eta)*(Gmax*ks*[P(z)]^2/(Gmax + ks*([P(z)]^2+q(1)*[Z]^2+q(2)*[SPN]^2))*n(z)*wt_j^(b_Ex-1)>_z
-       !!!delta = assimilation efficiency ==> (1-delta)*grazing = egestion
-       !!!eta = Excretion fraction ==> eta*grazing + Excretion(wt) = excretion
+          !!define ingestion averaged over z given n(z) (eg. of [P] for wt_j: 
+!!!= < (delta-eta)*(Gmax*ks*[P(z)]^2/(Gmax + ks*([P(z)]^2+q(1)*[Z]^2+q(2)*[SPN]^2))*n(z)*wt_j^(b_Ex-1)>_z
+!!!delta = assimilation efficiency ==> (1-delta)*grazing = egestion
+!!!eta = Excretion fraction ==> eta*grazing + Excretion(wt) = excretion
 
-!Find n(j):
+          !Find n(j):
           CALL pdf_avg(Zcopepod(k,1:mm%M),mm%i_space,mm%M,Ntot)
           IF (Ntot > 0.) THEN
              n_z(1:mm%M) = Zcopepod(k,1:mm%M)/Ntot
@@ -69,7 +75,7 @@ CONTAINS
              n_z = 0.
           END IF
           DO j = 1,Cevent(k)%length
-             IF (weight(j) > 0.) THEN
+             IF (weight(k,j) > 0.) THEN
                 ingest(:,j,k) = (Zoo(Cevent(k)%type)%delta-Zoo(cevent(k)%type)%eta)*&
                      weight(k,j)**(Zoo(Cevent(k)%type)%b2_Ex-1.)*Zoo(cevent(k)%type)%Gmax*&
                      Zoo(Cevent(k)%type)%ks*(Pmicro(:)**Zoo(Cevent(k)%type)%nn+&
@@ -78,10 +84,10 @@ CONTAINS
                      Zoo(Cevent(k)%type)%ks*(Pmicro(:)**Zoo(Cevent(k)%type)%nn+&
                      Zoo(Cevent(k)%type)%q(1)*Zmicro(:)**Zoo(Cevent(k)%type)%nn+&
                      Zoo(Cevent(k)%type)%q(2)*SPN(:)**Zoo(Cevent(k)%type)%nn)) 
-               ! ingest(:,j,k) = (Zoo(Cevent(k)%type)%delta-Zoo(cevent(k)%type)%eta)*&
-               !      weight(k,j)**(Zoo(Cevent(k)%type)%b_Ex-1.)*Zoo(cevent(k)%type)%Gmax*&
-               !      Zoo(Cevent(k)%type)%ks*totalprey(:)**Zoo(Cevent(k)%type)%nn/&
-               !      (Zoo(cevent(k)%type)%Gmax+Zoo(Cevent(k)%type)%ks*totalprey(:)**Zoo(Cevent(k)%type)%nn)
+                ! ingest(:,j,k) = (Zoo(Cevent(k)%type)%delta-Zoo(cevent(k)%type)%eta)*&
+                !      weight(k,j)**(Zoo(Cevent(k)%type)%b_Ex-1.)*Zoo(cevent(k)%type)%Gmax*&
+                !      Zoo(Cevent(k)%type)%ks*totalprey(:)**Zoo(Cevent(k)%type)%nn/&
+                !      (Zoo(cevent(k)%type)%Gmax+Zoo(Cevent(k)%type)%ks*totalprey(:)**Zoo(Cevent(k)%type)%nn)
                 n_dz = n_z(:)*mm%i_space(:)
                 CALL pdf_avg(ingest(:,j,k),n_dz,mm%M,species(k)%ingest(j))
              END IF
@@ -105,18 +111,18 @@ CONTAINS
                      (Zoo(Cevent(k)%type)%Gmax+Zoo(Cevent(k)%type)%ks*(Pmicro(:)**Zoo(Cevent(k)%type)%nn+&
                      Zoo(Cevent(k)%type)%q(1)*Zmicro(:)**Zoo(Cevent(k)%type)%nn+&
                      Zoo(Cevent(k)%type)%q(2)*SPN(:)**Zoo(Cevent(k)%type)%nn))
-               ! graze(1,:,j,k) = Zcopepod(k,:)*Zoo(cevent(k)%type)%Gmax*Zoo(Cevent(k)%type)%ks*&
-               !      weight(k,j)**(Zoo(Cevent(k)%type)%b_Ex)*Pmicro(:)*totalprey(:)/&
-               !      (Zoo(cevent(k)%type)%Gmax+&
-               !      Zoo(Cevent(k)%type)%ks*totalprey(:)**Zoo(Cevent(k)%type)%nn)
-               ! graze(2,:,j,k) = Zcopepod(k,:)*Zoo(cevent(k)%type)%Gmax*Zoo(Cevent(k)%type)%ks*&
-               !      weight(k,j)**(Zoo(Cevent(k)%type)%b_Ex)*Zoo(Cevent(k)%type)%q(1)*&
-               !      Zmicro(:)*totalprey(:)/(Zoo(cevent(k)%type)%Gmax+&
-               !      Zoo(Cevent(k)%type)%ks*totalprey(:)**Zoo(Cevent(k)%type)%nn)
-               ! graze(3,:,j,k) = Zcopepod(k,:)*Zoo(cevent(k)%type)%Gmax*Zoo(Cevent(k)%type)%ks*&
-               !      weight(k,j)**(Zoo(Cevent(k)%type)%b_Ex)*Zoo(Cevent(k)%type)%q(2)*&
-               !      SPN(:)*totalprey(:)/(Zoo(cevent(k)%type)%Gmax+&
-               !      Zoo(Cevent(k)%type)%ks*totalprey(:)**Zoo(Cevent(k)%type)%nn)
+                ! graze(1,:,j,k) = Zcopepod(k,:)*Zoo(cevent(k)%type)%Gmax*Zoo(Cevent(k)%type)%ks*&
+                !      weight(k,j)**(Zoo(Cevent(k)%type)%b_Ex)*Pmicro(:)*totalprey(:)/&
+                !      (Zoo(cevent(k)%type)%Gmax+&
+                !      Zoo(Cevent(k)%type)%ks*totalprey(:)**Zoo(Cevent(k)%type)%nn)
+                ! graze(2,:,j,k) = Zcopepod(k,:)*Zoo(cevent(k)%type)%Gmax*Zoo(Cevent(k)%type)%ks*&
+                !      weight(k,j)**(Zoo(Cevent(k)%type)%b_Ex)*Zoo(Cevent(k)%type)%q(1)*&
+                !      Zmicro(:)*totalprey(:)/(Zoo(cevent(k)%type)%Gmax+&
+                !      Zoo(Cevent(k)%type)%ks*totalprey(:)**Zoo(Cevent(k)%type)%nn)
+                ! graze(3,:,j,k) = Zcopepod(k,:)*Zoo(cevent(k)%type)%Gmax*Zoo(Cevent(k)%type)%ks*&
+                !      weight(k,j)**(Zoo(Cevent(k)%type)%b_Ex)*Zoo(Cevent(k)%type)%q(2)*&
+                !      SPN(:)*totalprey(:)/(Zoo(cevent(k)%type)%Gmax+&
+                !      Zoo(Cevent(k)%type)%ks*totalprey(:)**Zoo(Cevent(k)%type)%nn)
              ELSE
                 graze(:,:,j,k) = 0.
              END IF
@@ -129,13 +135,13 @@ CONTAINS
           END DO
 
 !!!!!!Egestion of Copepods : summed over Csources (k) and prey (l) (source of detritus)!!!!!!
-          
+
           DO x = 1,total_prey
              waste%medium(:) = waste%medium(:)+(1.0-Zoo(cevent(k)%type)%delta)*species(k)%graze(x,:)
           END DO
-          
+
 !!!!!!!Define excretion for individuals with weight wt_j:  Ex_j = a*(wt_j)^b
-          
+
           DO j = 1,Cevent(k)%length
              IF (species(k)%mature_pdf(j)%f > 0.) THEN
                 species(k)%Ex(j) = Zoo(cevent(k)%type)%a_Ex*weight(k,j)**Zoo(cevent(k)%type)%b_Ex
@@ -145,7 +151,7 @@ CONTAINS
                 excrete(j) = 0.
              END IF
           END DO
-          
+
           CALL pdf_avg(excrete(1:Cevent(k)%length),species(k)%mature_pdf(:)%f,Cevent(k)%length,avg_Ex)
           urea1(1:mm%M) = urea1(1:mm%M) + avg_Ex*Zcopepod(k,1:mm%M)
           !PRINT "(A)","avg_Ex"
@@ -157,9 +163,9 @@ CONTAINS
           !PRINT *,urea1(1)
        END IF
     END DO
-       
+
   END SUBROUTINE Copepod_growth
-    
+
   SUBROUTINE Copepod_mortality(PZ,size,zoo,species,cevent,mm,Csources,C_types,waste,bin)
 
     INTEGER, INTENT(IN)::size,Csources,C_types,bin
@@ -169,23 +175,23 @@ CONTAINS
     TYPE(event), DIMENSION(Csources),INTENT(IN)::cevent
     TYPE(copepod), DIMENSION(Csources),INTENT(IN OUT)::species
     TYPE(losses),INTENT(IN OUT)::waste
-    
+
     INTEGER::j,k,bin_tot2
     DOUBLE PRECISION::avg_wt, n2_avg_z
     DOUBLE PRECISION, DIMENSION(mm%M)::n_dz
     DOUBLE PRECISION, DIMENSION(Csources,bin)::weight  !species(yy)%mature_pdf(1:Cevent(yy)%length)%wt_avg
     DOUBLE PRECISION, DIMENSION(Csources,mm%M)::Zcopepod !species(yy)%n(1:M)*species(yy)%Ntot = 
-                                                         !species(yy)%Z%new(1:M)
-    
+    !species(yy)%Z%new(1:M)
+
     bin_tot2 = 0
     weight = 0.
 
-!d(n*Ntot)/dt = -species(k)%mort = -M*(n*Ntot)^2
-!d(D(3))/dt = M*(n*Ntot)^2*<wt> = waste%large
-!or for weight dependent mortality  d(n*Ntot)/dt = -M'*(n*Ntot)*sum([f(i)wavg(i)]**p)
-! where p = 1 or -1
-!and for each cohort  f'(i) = Ntot/Ntot'(f'(i)-M'dt*(f(i)wavg(i)**p) where ' on f and Ntot indicates
-!next timestep value.  
+    !d(n*Ntot)/dt = -species(k)%mort = -M*(n*Ntot)^2
+    !d(D(3))/dt = M*(n*Ntot)^2*<wt> = waste%large
+    !or for weight dependent mortality  d(n*Ntot)/dt = -M'*(n*Ntot)*sum([f(i)wavg(i)]**p)
+    ! where p = 1 or -1
+    !and for each cohort  f'(i) = Ntot/Ntot'(f'(i)-M'dt*(f(i)wavg(i)**p) where ' on f and Ntot indicates
+    !next timestep value.  
     DO k = 1,Csources 
        bin_tot2 = bin_tot2 + cevent(k)%length
 
@@ -232,22 +238,22 @@ CONTAINS
     ratio = 0.
     Oup_cell = 0.
     Hup_cell = 0.
-    
+
 
     DO j = 1,mm%M
        Rmax(j)=micro%R*1.88**(0.1*(TT(j)-273.15-20))
-!       Resp(j)=(micro%Rm)*1.88**(0.1*(TT(j)-273.15-20))
+       !       Resp(j)=(micro%Rm)*1.88**(0.1*(TT(j)-273.15-20))
        Resp(j)=(micro%Rm)*1.88**(0.1*(TT(j)-273.15-20))
        Resp(j+mm%M)=(micro%M_z)*1.88**(0.1*(TT(j)-273.15-20))
        micro%growth%light(j) = Rmax(j)*(1.0-EXP(-micro%sigma*I_par(j)/Rmax(j))) 
        Uc(j) = (1.0-micro%gamma)*micro%growth%light(j)*(1/(1+micro%inhib*I_par(j))) !- micro%Rm
-    END DO 
+    END DO
 
 
 
     DO j = 1,mm%M
        IF (Nitrate(j) > small) THEN
-         Oup_cell(j) = Rmax(j)*Nitrate(j)*micro%kapa*EXP(-micro%gamma_o*Ammonium(j))/&
+          Oup_cell(j) = Rmax(j)*Nitrate(j)*micro%kapa*EXP(-micro%gamma_o*Ammonium(j))/&
                (micro%k + Nitrate(j)*micro%kapa*EXP(-micro%gamma_o*Ammonium(j))+Ammonium(j))*&
                (Nitrate(j)+Ammonium(j))**micro%N_x/(micro%N_o+(Nitrate(j)+Ammonium(j))**micro%N_x)
        ELSE
@@ -273,7 +279,7 @@ CONTAINS
           PRINT *,Hup_cell(j)
           STOP
        END IF
-          
+
     END DO
 
     DO j = 1,mm%M
@@ -288,7 +294,7 @@ CONTAINS
              N%H_uptake%new(j) = Hup_cell(j)*P(j)+N%H_uptake%new(j)
              N%O_uptake%new(j) = (Uc(j) - Hup_cell(j))*P(j)+N%O_uptake%new(j)
           END IF
-      ELSE IF (Uc(j) >= 0. .AND. Uc(j) >= Oup_cell(j) + Hup_cell(j)) THEN
+       ELSE IF (Uc(j) >= 0. .AND. Uc(j) >= Oup_cell(j) + Hup_cell(j)) THEN
           !nutrient uptake controls growth
           !NUTRIENT LIMITING
           micro%growth%new(j) = Oup_cell(j) + Hup_cell(j)  !- micro%Rm
@@ -301,20 +307,23 @@ CONTAINS
           N%H_uptake%new(j) = Hup_cell(j)*P(j)+N%H_uptake%new(j)
        ELSE  !No nutrient uptake, no growth
           micro%growth%new(j) =  0!- micro%Rm
-      END IF
+       END IF
     END DO
 
 
-!---mortality-------------------------
-!    micro%mort%new = Zoo%Gmax*Zoo%ks*Zoo%molt_wt(0)**Zoo%b2_Ex*&
-!           P**Zoo%nn/(Zoo%Gmax+Zoo%ks*P**Zoo%nn)*120000./80.*micro%M_z   !cevent%nauplii == 120000
+    !---mortality-------------------------
+    !    micro%mort%new = Zoo%Gmax*Zoo%ks*Zoo%molt_wt(0)**Zoo%b2_Ex*&
+    !           P**Zoo%nn/(Zoo%Gmax+Zoo%ks*P**Zoo%nn)*120000./80.*micro%M_z   !cevent%nauplii == 120000
 
 
 
   END SUBROUTINE p_growth
-  
-  SUBROUTINE p_graze(PZ,size,mm,zmicro,micro,N,waste,Csources,bin_tot,Zoo,cevent)   !***
-    
+
+  subroutine p_graze(PZ, size, mm, zmicro, micro, N, waste, Csources, &
+       bin_tot, Zoo, cevent)
+    ! *** What's it do?
+
+    ! Arguments:
     INTEGER, INTENT(IN)::size, Csources,bin_tot
     DOUBLE PRECISION, DIMENSION(size), INTENT(IN)::PZ   !PZ
     TYPE(gr_d), INTENT(IN)::mm
@@ -323,7 +332,7 @@ CONTAINS
     TYPE(losses), INTENT(IN OUT)::waste
     TYPE(Cdata), INTENT(IN)::Zoo  !Zoo(1)
     TYPE(event),INTENT(IN)::cevent !Cevent(1)
-    
+
     DOUBLE PRECISION, DIMENSION(zprey,mm%M)::graze
     DOUBLE PRECISION, DIMENSION(zprey)::p_bin_size
     INTEGER::kk, xx, j,total_prey    
@@ -348,26 +357,24 @@ CONTAINS
             (zmicro%G+zmicro%ks*(Pnano(kk)**zmicro%nn+zmicro%q(1)*SUS(kk)**zmicro%nn+&
             zmicro%q(2)*SPN(kk)**zmicro%nn))
     END DO
-       
+
     DO kk = 1,mm%M
        DO j = 1,zprey  !total growth per zmicro
           zmicro%growth%new(kk) = zmicro%growth%new(kk) + zmicro%graze(j,kk)*(zmicro%delta-zmicro%eta)
-                          !egested material
+          !egested material
           waste%small(kk) = waste%small(kk) + (1.0-zmicro%delta)*zmicro%graze(j,kk)*Z_micro(kk)
-                          !excretion
+          !excretion
           N%urea%new(kk) = N%urea%new(kk) + zmicro%eta*zmicro%graze(j,kk)*Z_micro(kk)
        END DO
-        zmicro%mort%new(kk) = Zoo%Gmax*Zoo%ks*Zoo%molt_wt(0)**Zoo%b2_Ex*Zoo%q(1)*&
-             Z_micro(kk)**Zoo%nn/(Zoo%Gmax+Zoo%ks*Zoo%q(1)*Z_micro(kk)**Zoo%nn)*120000./80.*&
-             !cevent%nauplii = 120000
-             zmicro%M_z 
-        !=Z_micro(kk)%M_z is now a fraction of total arriving copepodites
+       zmicro%mort%new(kk) = Zoo%Gmax*Zoo%ks*Zoo%molt_wt(0)**Zoo%b2_Ex*Zoo%q(1)*&
+            Z_micro(kk)**Zoo%nn/(Zoo%Gmax+Zoo%ks*Zoo%q(1)*Z_micro(kk)**Zoo%nn)*120000./80.*&
+            !cevent%nauplii = 120000
+       zmicro%M_z 
+       !=Z_micro(kk)%M_z is now a fraction of total arriving copepodites
     END DO                !total dead zmicro
     waste%medium(1:mm%M) = waste%medium(1:mm%M) + (1.-Zoo%delta)*zmicro%mort%new(1:mm%M) !*Z_micro(1:mm%M)
-   ! N%urea%new(1:mm%M) =  N%urea%new(1:mm%M) + Zoo%eta*zmicro%mort%new(1:mm%M)
+    ! N%urea%new(1:mm%M) =  N%urea%new(1:mm%M) + Zoo%eta*zmicro%mort%new(1:mm%M)
 
   END SUBROUTINE p_graze
-  
-END MODULE reaction
 
-
+end module reaction
