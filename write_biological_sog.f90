@@ -1,13 +1,16 @@
-SUBROUTINE write_biological_sog
+! $Id$
+! $Source$
 
-  USE declarations
-  USE surface_forcing
+subroutine write_biological_sog
 
-  IMPLICIT NONE
+  use declarations
+  use surface_forcing
 
-!new parameters
+  implicit none
 
-  EXTERNAL bin_wts
+  !new parameters
+
+  ! Local variables:
   DOUBLE PRECISION::ezone_NOup, ezone_NHup,  ezone_fratio,cohort_b,cohort_f,cohort_mwt,cohort_mwt_o,&
        mixlay_NOup,mixlay_NHup, mixlay_fratio,mixlay_up, mixlay_D2
   DOUBLE PRECISION,DIMENSION(M)::copepodml,NPPml,PONml,DNml,SPNml,tempT,fratioavg,Totalup,ngrowP,dgrowD,&
@@ -15,9 +18,9 @@ SUBROUTINE write_biological_sog
   DOUBLE PRECISION::mixlay_SPN
   INTEGER::jj,years,sizerun,jj_day,day_count,cohort_cnt
 
- 100  FORMAT(1X, E15.8)
- 200  FORMAT(1X, I10)
-  
+100 FORMAT(1X, E15.8)
+200 FORMAT(1X, I10)
+
   jj_day = 0
 
   DO jj = 1,27
@@ -50,8 +53,8 @@ SUBROUTINE write_biological_sog
      NO_o(day_count) = NO_o(day_count)+N%O%new(1)
      ngrow_o(day_count) = ngrow_o(day_count)+nano%growth%new(1)
      dgrow_o(day_count) = dgrow_o(day_count)+micro%growth%new(1)
-    ! PRINT "(A)","NO_o(day_count),day_count,N%O%new(1),year"
-    ! PRINT *,NO_o(day_count),day_count,N%O%new(1),year
+     ! PRINT "(A)","NO_o(day_count),day_count,N%O%new(1),year"
+     ! PRINT *,NO_o(day_count),day_count,N%O%new(1),year
      euph_new(day_count) = euph_new(day_count) + grid%d_g(euph%g)
      hm_new(day_count) = hm_new(day_count) + h_m%new
      euph_g(day_count) = euph%g + euph_g(day_count)
@@ -84,15 +87,15 @@ SUBROUTINE write_biological_sog
      END IF
 
      !IF (year == 1967) THEN
-      !  IF (Cevent(1)%on /= 0 .AND. day_check /= 0 .AND. day_time <= 43200.0 ) THEN
-           !DO jj = 1,nobins+1
-           !   IF (day == daybins(jj)) THEN
-           
-          ! CALL bin_wts  !find bin_cnt 
-          ! bin_cnt_year(day_count-54,0:bin_no+2) = bin_cnt(0:bin_no+2)             
-           !END IF
-           !END DO
-      !  END IF
+     !  IF (Cevent(1)%on /= 0 .AND. day_check /= 0 .AND. day_time <= 43200.0 ) THEN
+     !DO jj = 1,nobins+1
+     !   IF (day == daybins(jj)) THEN
+
+     ! CALL bin_wts  !find bin_cnt 
+     ! bin_cnt_year(day_count-54,0:bin_no+2) = bin_cnt(0:bin_no+2)             
+     !END IF
+     !END DO
+     !  END IF
      !END IF
      IF (Cevent(1)%on /= 0 .AND. day_check /= 0 .AND. day_time <= 43200.0 ) THEN  !only once a day when
         ! migration "may" occur !!!!!!!!!
@@ -134,9 +137,9 @@ SUBROUTINE write_biological_sog
            species_mwt_o(day_count) = species_mwt_o(day_count)+cohort_mwt_o
         END IF
      END IF
-!for NPP only calculate integrated values i.e. per m^2 per day
+     !for NPP only calculate integrated values i.e. per m^2 per day
 
-! Mixed layer average quantities
+     ! Mixed layer average quantities
      CALL average2(grid,P%nano%new(1:M),h_m%new,mixlay%nano)
      nano_ml(day_count) = nano_ml(day_count)+mixlay%nano
      CALL average2(grid,P%micro%new(1:M),h_m%new,mixlay%diatom)
@@ -147,7 +150,7 @@ SUBROUTINE write_biological_sog
      CALL average2(grid,copepodml(1:M),h_m%new,mixlay%copepod)
      copepod_ml(day_count) = copepod_ml(day_count)+mixlay%copepod
      PONml(1:M) = Detritus(2)%D%new(1:M)+Detritus(1)%D%new(1:M)+ P%nano%new(1:M)+P%micro%new(1:M)+&
-            Z%micro%new(1:M)
+          Z%micro%new(1:M)
      SPNml(1:M) = Detritus(1)%D%new(1:M)+ P%nano%new(1:M)+Z%micro%new(1:M)
      CALL average2(grid,SPNml(1:M),h_m%new,mixlay_SPN)
      SPN_ml(day_count) = SPN_ml(day_count) + mixlay_SPN
@@ -161,7 +164,7 @@ SUBROUTINE write_biological_sog
      CALL average2(grid,N%H%new(1:M),h_m%new,mixlay%NH)
      NH_ml(day_count) = NH_ml(day_count)+mixlay%NH
      NPPml(1:M) = nano%growth%new(1:M)*P%nano%new(1:M)+&
-                micro%growth%new(1:M)*P%micro%new(1:M)
+          micro%growth%new(1:M)*P%micro%new(1:M)
      CALL average2(grid,NPPml(1:M),h_m%new,mixlay%NPP)
      NPP_ml(day_count) = NPP_ml(day_count)+mixlay%NPP*h_m%new  !integrated quantity
      ngrowP(1:M) = nano%growth%new(1:M)*P%nano%new(1:M)
@@ -201,15 +204,15 @@ SUBROUTINE write_biological_sog
      D3rate(1:M) = (Detritus(3)%D%new(1:M)-Detritus(3)%D%old(1:M))/dt*3600.*24.  !daily rate of loss
      CALL sum_g(grid, D3rate(1:M),h_m%new,mixlay%out)
      D3_ml(day_count) = D3_ml(day_count) + mixlay%out  !average daily rate of loss frpm m.l.  gN m^-2 day^-1
-    ! T2nano_ml(day_count) = T2nano_ml(day_count) + mixlay%ngrow
-   !  TempT(1:M) = P%nano%new(1:M)*LOG(2.)/(nano%growth%new(1:M)+1.D-20)
-   !  CALL average2(grid,TempT(1:M),h_m%new,doubleT%nano)
-   !  doubleT%nano = doubleT%nano/mixlay%nano
-   !  T2nano_ml(day_count) = T2nano_ml(day_count)+doubleT%nano
-   !  TempT(1:M) = P%micro%new(1:M)*LOG(2.)/(micro%growth%new(1:M)+1.D-20)
-   !  CALL average2(grid,TempT(1:M),h_m%new,doubleT%diatom)
-   !  doubleT%diatom = doubleT%diatom/mixlay%diatom
-   !  T2diatom_ml(day_count) = T2diatom_ml(day_count)+doubleT%diatom
+     ! T2nano_ml(day_count) = T2nano_ml(day_count) + mixlay%ngrow
+     !  TempT(1:M) = P%nano%new(1:M)*LOG(2.)/(nano%growth%new(1:M)+1.D-20)
+     !  CALL average2(grid,TempT(1:M),h_m%new,doubleT%nano)
+     !  doubleT%nano = doubleT%nano/mixlay%nano
+     !  T2nano_ml(day_count) = T2nano_ml(day_count)+doubleT%nano
+     !  TempT(1:M) = P%micro%new(1:M)*LOG(2.)/(micro%growth%new(1:M)+1.D-20)
+     !  CALL average2(grid,TempT(1:M),h_m%new,doubleT%diatom)
+     !  doubleT%diatom = doubleT%diatom/mixlay%diatom
+     !  T2diatom_ml(day_count) = T2diatom_ml(day_count)+doubleT%diatom
      TempT(1:M) = Z%micro%new(1:M)*LOG(2.)/(zmicro%growth%new(1:M)+1.D-20)
      CALL average2(grid,TempT(1:M),h_m%new,doubleT%zmicro)
      doubleT%zmicro = doubleT%zmicro/mixlay%zmicro
@@ -233,7 +236,7 @@ SUBROUTINE write_biological_sog
      CALL average2(grid, Totalup(1:M),h_m%new,mixlay_up)
      mixlay_fratio = mixlay_fratio/(mixlay_up+1.D-20)
      fratio_ml(day_count) = fratio_ml(day_count)+mixlay_fratio
-!150 m average quantities 147.5 m
+     !150 m average quantities 147.5 m
      CALL average2(grid,PONml(1:M),grid%d_g(g_150),depth150%PN)
      CALL average2(grid,DNml(1:M),grid%d_g(g_150),depth150%DN)
      CALL average2(grid,copepodml(1:M),grid%d_g(g_150),depth150%copepod)
@@ -244,18 +247,18 @@ SUBROUTINE write_biological_sog
      copepod_150(day_count) = copepod_150(day_count) +depth150%copepod
      NH_150(day_count) = NH_150(day_count) +depth150%NH
      NO_150(day_count) = NO_150(day_count) + depth150%NO
-     
-!100 m average quantities  actually 97.5 m
+
+     !100 m average quantities  actually 97.5 m
      CALL average2(grid,PONml(1:M),grid%d_g(g_100),depth100%PN)
      CALL average2(grid,DNml(1:M),grid%d_g(g_100),depth100%DN)
      PN_100(day_count) = PN_100(day_count) +depth100%PN
      DN_100(day_count) = DN_100(day_count) +depth100%DN
 
-!80 m average quantities  77.5 m
+     !80 m average quantities  77.5 m
      CALL average2(grid,NPPml(1:M),grid%d_g(g_80),depth80%NPP)
      NPP_80(day_count) = NPP_80(day_count)+depth80%NPP*grid%d_g(g_80)
 
-!ezone average quantities
+     !ezone average quantities
      CALL average2(grid,P%nano%new(1:M),grid%d_g(euph%g),ezone%nano)
      CALL average2(grid,P%micro%new(1:M),grid%d_g(euph%g),ezone%diatom)
      CALL average2(grid,PONml(1:M),grid%d_g(euph%g),ezone%PN)
@@ -284,7 +287,7 @@ SUBROUTINE write_biological_sog
      NHup_e(day_count) = NHup_e(day_count) +ezone_NHup
      fratio_e(day_count) = fratio_e(day_count) + ezone_fratio
 
-!200 m total
+     !200 m total
      CALL sum_g(grid,D3rate(1:M),DBLE(grid%D),mixlay%out)
      CALL average2(grid,N%H%new(1:M),DBLE(grid%D),depth200%NH)
      CALL average2(grid,N%O%new(1:M),DBLE(grid%D),depth200%NO)
@@ -299,16 +302,16 @@ SUBROUTINE write_biological_sog
   ELSE IF (time_step == steps) THEN  !time_step == steps
      DO xx = 1,sizerun  !27*years
 
-      !  IF (cnt_wt(xx) <= 0) THEN
-      !     molt_wt(xx) = 0.
-      !  ELSE
-      !     molt_wt(xx) = molt_wt(xx)/DBLE(cnt_wt(xx))
-      !  END IF
-      !  IF (cnt_avg_wt(xx) <= 0) THEN
-      !     avg_wt(xx) = 0.
-      !  ELSE
-      !     avg_wt(xx) = avg_wt(xx)/DBLE(cnt_avg_wt(xx))
-      !  END IF        
+        !  IF (cnt_wt(xx) <= 0) THEN
+        !     molt_wt(xx) = 0.
+        !  ELSE
+        !     molt_wt(xx) = molt_wt(xx)/DBLE(cnt_wt(xx))
+        !  END IF
+        !  IF (cnt_avg_wt(xx) <= 0) THEN
+        !     avg_wt(xx) = 0.
+        !  ELSE
+        !     avg_wt(xx) = avg_wt(xx)/DBLE(cnt_avg_wt(xx))
+        !  END IF        
         IF (species_cnt(xx) <= 0) THEN          
            species_b(xx) =  0.
            species_mwt(xx) = 0.
@@ -317,7 +320,7 @@ SUBROUTINE write_biological_sog
            species_b(xx) = species_b(xx)/DBLE(species_cnt(xx))
            species_mwt(xx) = species_mwt(xx)/DBLE(species_cnt(xx))
            species_mwt_o(xx) = species_mwt_o(xx)/DBLE(species_cnt(xx))
-        END IF        
+        END IF
         IF (species_cnt2(xx) <= 0) THEN        
            stage1_no(xx) =  0.
            stage2_no(xx) =  0.
@@ -406,45 +409,45 @@ SUBROUTINE write_biological_sog
            NO_200(xx) = 0.
            NH_200(xx) = 0.
            PN_200(xx) = 0.  
-          ! stage1_n(xx) = 0.
-          ! stage2_n(xx) =  0. 
-          ! stage3_n(xx) =  0.
-          ! stage4_n(xx) =  0.
-          ! stage5_n(xx) =  0.
-          ! stage6_n(xx) =   0.
-          ! nano_avg(xx) =  0.
-          ! diatom_avg(xx) =  0. 
-          ! zmicro_avg(xx) =  0.
-          ! copepod_avg(xx) =  0.
-          ! don_avg(xx) =  0.
-          ! pon_avg(xx) =  0.
-          ! out_avg(xx) = 0.
-          ! NO_avg(xx) = 0. 
-          ! NH_avg(xx) = 0.
-          ! Ntot_avg(xx) =  0.
-          ! urea_cop(xx) = 0.
-          ! urea_fla(xx) = 0.
-          ! wt_stage1(xx) = 0. 
+           ! stage1_n(xx) = 0.
+           ! stage2_n(xx) =  0. 
+           ! stage3_n(xx) =  0.
+           ! stage4_n(xx) =  0.
+           ! stage5_n(xx) =  0.
+           ! stage6_n(xx) =   0.
+           ! nano_avg(xx) =  0.
+           ! diatom_avg(xx) =  0. 
+           ! zmicro_avg(xx) =  0.
+           ! copepod_avg(xx) =  0.
+           ! don_avg(xx) =  0.
+           ! pon_avg(xx) =  0.
+           ! out_avg(xx) = 0.
+           ! NO_avg(xx) = 0. 
+           ! NH_avg(xx) = 0.
+           ! Ntot_avg(xx) =  0.
+           ! urea_cop(xx) = 0.
+           ! urea_fla(xx) = 0.
+           ! wt_stage1(xx) = 0. 
            !wt_stage2(xx) = 0. 
-          ! wt_stage3(xx) = 0.  
-          ! wt_stage4(xx) = 0.
-          ! wt_stage5(xx) = 0. 
-          ! n_loss(xx) =  0.
-          ! nano_gML(xx) =  0.
-          ! micro_gML(xx) =  0.
-          ! nano_g50(xx) =  0.
-          ! micro_g50(xx) = 0. 
+           ! wt_stage3(xx) = 0.  
+           ! wt_stage4(xx) = 0.
+           ! wt_stage5(xx) = 0. 
+           ! n_loss(xx) =  0.
+           ! nano_gML(xx) =  0.
+           ! micro_gML(xx) =  0.
+           ! nano_g50(xx) =  0.
+           ! micro_g50(xx) = 0. 
            !nano_go(xx)=  0.
            !micro_go(xx) = 0. 
-          ! nano_zML(xx)=  0.
-          ! micro_zML(xx) = 0. 
-          ! nano_zo(xx)= 0.
-          ! micro_zo(xx) = 0.
-          ! NPPd(xx) =  0.
-          ! NPPn(xx) = 0.
-          ! NPPd_o(xx) = 0. 
-          ! NPPn_o(xx) =  0.
-          ! fratio(xx) = 0.
+           ! nano_zML(xx)=  0.
+           ! micro_zML(xx) = 0. 
+           ! nano_zo(xx)= 0.
+           ! micro_zo(xx) = 0.
+           ! NPPd(xx) =  0.
+           ! NPPn(xx) = 0.
+           ! NPPd_o(xx) = 0. 
+           ! NPPn_o(xx) =  0.
+           ! fratio(xx) = 0.
         ELSE
            NO_o(xx) = NO_o(xx)/DBLE(o_cnt(xx)) 
            nano_ml(xx) = nano_ml(xx)/DBLE(o_cnt(xx))
@@ -518,169 +521,188 @@ SUBROUTINE write_biological_sog
            PN_200(xx) =PN_200(xx)/DBLE(o_cnt(xx))
         END IF
      END DO
-     WRITE(125,100)REAL(NO_o(1:sizerun)),REAL(NO_ml(1:sizerun)),REAL(NO_e(1:sizerun)),REAL(NO_150(1:sizerun)),REAL(NO_200(1:sizerun))
-     WRITE(110,100)REAL(nano_ml(1:sizerun)),REAL(nano_e(1:sizerun))
-     WRITE(112,100)REAL(diatom_ml(1:sizerun)),REAL(diatom_e(1:sizerun))
-     WRITE(114,100)REAL(zmicro_ml(1:sizerun))
-     WRITE(116,100)REAL(copepod_ml(1:sizerun)),REAL(copepod_150(1:sizerun))
-     WRITE(117,100)REAL(NPP_ml(1:sizerun)),REAL(NPP_80(1:sizerun)),REAL(NPP_e(1:sizerun))
-     WRITE(122,100)REAL(PN_ml(1:sizerun)),REAL(PN_150(1:sizerun)),REAL(PN_e(1:sizerun)),REAL(PN_100(1:sizerun)),REAL(PN_200(1:sizerun))
-     WRITE(122,100)REAL(SPN_ml(1:sizerun))  !suspended particulates
-     WRITE(128,100)REAL(DN_ml(1:sizerun)),REAL(DN_150(1:sizerun)),REAL(DN_e(1:sizerun)),REAL(DN_100(1:sizerun))     
-     WRITE(126,100)REAL(NH_ml(1:sizerun)),REAL(NH_e(1:sizerun)),REAL(NH_150(1:sizerun)),REAL(NH_200(1:sizerun))
+
+     ! *** Why are there so many type-casts to REAL in these write statements??
+     write(125, 100) real(NO_o(1:sizerun)), real(NO_ml(1:sizerun)), &
+          real(NO_e(1:sizerun)), real(NO_150(1:sizerun)),           &
+          REAL(NO_200(1:sizerun))
+     write(110, 100) real(nano_ml(1:sizerun)), real(nano_e(1:sizerun))
+     write(112, 100) real(diatom_ml(1:sizerun)), real(diatom_e(1:sizerun))
+     write(114, 100) real(zmicro_ml(1:sizerun))
+     write(116, 100) real(copepod_ml(1:sizerun)), real(copepod_150(1:sizerun))
+     write(117, 100) real(NPP_ml(1:sizerun)), real(NPP_80(1:sizerun)), &
+          REAL(NPP_e(1:sizerun))
+     write(122, 100) real(PN_ml(1:sizerun)), real(PN_150(1:sizerun)), &
+          real(PN_e(1:sizerun)), real(PN_100(1:sizerun)),             &
+          real(PN_200(1:sizerun))
+     write(122, 100) real(SPN_ml(1:sizerun))  !suspended particulates
+     write(128, 100) real(DN_ml(1:sizerun)),real(DN_150(1:sizerun)), &
+          real(DN_e(1:sizerun)), real(DN_100(1:sizerun))     
+     write(126, 100) real(NH_ml(1:sizerun)), real(NH_e(1:sizerun)), &
+          real(NH_150(1:sizerun)), real(NH_200(1:sizerun))
      WRITE(119,100)REAL(NOup_e(1:sizerun)),REAL(NOup_ml(1:sizerun))
      WRITE(121,100)REAL(NHup_e(1:sizerun)),REAL(NHup_ml(1:sizerun))
      WRITE(123,100)REAL(fratio_ml(1:sizerun)),REAL(fratio_e(1:sizerun))
      WRITE(124,200)hm_g(1:sizerun),euph_g(1:sizerun)
      WRITE(124,100)REAL(hm_new(1:sizerun)),REAL(euph_new(1:sizerun))
-     WRITE(127,100)REAL(ngrow_ml(1:sizerun)),REAL(ngrow_e(1:sizerun)),REAL(ngrow_o(1:sizerun))
-     WRITE(127,100)REAL(dgrow_ml(1:sizerun)),REAL(dgrow_e(1:sizerun)),REAL(dgrow_o(1:sizerun))
-     WRITE(129,100)REAL(species_b(1:sizerun)),REAL(species_mwt(1:sizerun)),REAL(species_mwt_o(1:sizerun))
-     WRITE(129,100)REAL(species_avgwt(1:sizerun))
-   !  WRITE(130,100)REAL(bin_logwt(1:bin_no))
-  !   DO jj = 1,27
-  !     WRITE(130,100) REAL(bin_cnt_year(jj,0:bin_no+2))
-  !  END DO
+     WRITE(127,100) real(ngrow_ml(1:sizerun)), real(ngrow_e(1:sizerun)), &
+          real(ngrow_o(1:sizerun))
+     WRITE(127,100) real(dgrow_ml(1:sizerun)), real(dgrow_e(1:sizerun)), &
+          real(dgrow_o(1:sizerun))
+     WRITE(129,100) real(species_b(1:sizerun)), real(species_mwt(1:sizerun)), &
+          real(species_mwt_o(1:sizerun))
+     WRITE(129,100) real(species_avgwt(1:sizerun))
+     !  WRITE(130,100)REAL(bin_logwt(1:bin_no))
+     !   DO jj = 1,27
+     !     WRITE(130,100) REAL(bin_cnt_year(jj,0:bin_no+2))
+     !  END DO
      WRITE(131,100)REAL(stage1_no(1:sizerun)),REAL(stage2_no(1:sizerun)),REAL(stage3_no(1:sizerun))
      WRITE(131,100)REAL(stage4_no(1:sizerun)),REAL(stage5_no(1:sizerun)),REAL(out_no(1:sizerun))
      WRITE(133,100)REAL(T2nano_ml(1:sizerun)),REAL(T2diatom_ml(1:sizerun)),REAL(T2zmicro_ml(1:sizerun))
      WRITE(133,100)REAL(Thalfnano_ml(1:sizerun)),REAL(Thalfdiatom_ml(1:sizerun)),REAL(Thalfzmicro_ml(1:sizerun))
-     WRITE(135,100)REAL(PONflux200(1:sizerun)),REAL(PONfluxml(1:sizerun)),REAL(PONflux100(1:sizerun)),REAL(feacalml(1:sizerun)),REAL(ureac(1:sizerun)),REAL(ureaf(1:sizerun)),REAL(D3_ml(1:sizerun)),REAL(D3_200(1:sizerun))
+     write(135, 100) real(PONflux200(1:sizerun)), real(PONfluxml(1:sizerun)), &
+          real(PONflux100(1:sizerun)), real(feacalml(1:sizerun)),             &
+          real(ureac(1:sizerun)), real(ureaf(1:sizerun)),                     &
+          real(D3_ml(1:sizerun)), real(D3_200(1:sizerun))
      WRITE(136,100)REAL(migrateflux(1:sizerun))
-     WRITE(137,100)REAL(NOflux200(1:sizerun)),REAL(NOfluxml(1:sizerun)),REAL(NOflux100(1:sizerun)),REAL(NHflux200(1:sizerun)),REAL(NHfluxml(1:sizerun)),REAL(NHflux100(1:sizerun))
-     WRITE(143,100)REAL(zgrazen_ml(1:sizerun)),REAL(cgrazed_ml(1:sizerun)),REAL(cgrazez_ml(1:sizerun)),REAL(cgrazed2_ml(1:sizerun))   !cgraze contains background term     
+     write(137, 100) real(NOflux200(1:sizerun)), real(NOfluxml(1:sizerun)), &
+          real(NOflux100(1:sizerun)), real(NHflux200(1:sizerun)),           &
+          real(NHfluxml(1:sizerun)), real(NHflux100(1:sizerun))
+     write(143, 100) real(zgrazen_ml(1:sizerun)),                   &
+          real(cgrazed_ml(1:sizerun)), real(cgrazez_ml(1:sizerun)), &
+          real(cgrazed2_ml(1:sizerun))   !cgraze contains background term     
      o_cnt(1:sizerun) = 0.
      species_cnt(1:sizerun) = 0.
      species_cnt2(1:sizerun) = 0.
-           NO_o(1:sizerun) = 0.
-           nano_ml(1:sizerun) = 0.
-           diatom_ml(1:sizerun) = 0.
-           zmicro_ml(1:sizerun) = 0.
-           copepod_ml(1:sizerun) =0.
-           NPP_ml(1:sizerun) = 0.
-           PN_ml(1:sizerun) =0.
-           DN_ml(1:sizerun) =0.
-           NO_ml(1:sizerun) =0.
-           NH_ml(1:sizerun) =0.
-           SPN_ml(1:sizerun) = 0.
-           T2nano_ml(1:sizerun) = 0.
-           T2diatom_ml(1:sizerun) = 0.
-           T2zmicro_ml(1:sizerun) = 0.
-           Thalfnano_ml(1:sizerun) = 0.
-           Thalfdiatom_ml(1:sizerun) = 0.
-           Thalfzmicro_ml(1:sizerun) = 0.
-           PONflux200(1:sizerun) = 0.
-           PONflux100(1:sizerun) = 0.
-           PONfluxml(1:sizerun) = 0.
-           NOflux200(1:sizerun) = 0.
-           NOfluxml(1:sizerun) = 0.
-           NOflux100(1:sizerun) = 0.
-           NHflux200(1:sizerun) = 0.
-           NHfluxml(1:sizerun) = 0.
-           NHflux100(1:sizerun) = 0.
-           feacalml(1:sizerun) = 0.
-           ureac(1:sizerun) = 0.
-           ureaf(1:sizerun) = 0.
-           migrateflux(1:sizerun) = 0.
-           copepod_150(1:sizerun) = 0.
-           NH_150(1:sizerun) = 0.
-           NO_150(1:sizerun) = 0.
-           PN_150(1:sizerun) = 0.
-           DN_150(1:sizerun) = 0.
-           PN_100(1:sizerun) = 0.
-           DN_100(1:sizerun) = 0.
-           nano_e(1:sizerun) = 0.
-           diatom_e(1:sizerun) = 0.
-           PN_e(1:sizerun) = 0.
-           DN_e(1:sizerun) = 0.
-           NO_e(1:sizerun) =0.
-           NH_e(1:sizerun) =0.
-           NOup_e(1:sizerun) =0.
-           NHup_e(1:sizerun) =0.
-           NOup_ml(1:sizerun) =0.
-           NHup_ml(1:sizerun) =0.
-           fratio_e(1:sizerun) = 0.
-           fratio_ml(1:sizerun) = 0.
-           NPP_e(1:sizerun) = 0.
-           NPP_80(1:sizerun) = 0.
-           ngrow_o(1:sizerun) = 0.
-           dgrow_o(1:sizerun) = 0.
-           ngrow_ml(1:sizerun) = 0.
-           dgrow_ml(1:sizerun) = 0.
-           zgrazen_ml(1:sizerun) = 0.
-           cgrazed_ml(1:sizerun) = 0.
-           cgrazez_ml(1:sizerun) = 0.
-           cgrazed2_ml(1:sizerun) = 0.
-           ngrow_e(1:sizerun) = 0.
-           dgrow_e(1:sizerun) = 0.
-           euph_new(1:sizerun) = 0.
-           hm_new(1:sizerun) = 0.
-           hm_g(1:sizerun) = 0
-           euph_g(1:sizerun) = 0
-           D3_ml(1:sizerun) = 0.
-           D3_200(1:sizerun) = 0.
-           NO_200(1:sizerun) = 0.
-           NH_200(1:sizerun) = 0.
-           PN_200(1:sizerun) = 0.         
-           species_b(1:sizerun) =  0.
-           species_mwt(1:sizerun) = 0.
-           species_mwt_o(1:sizerun) = 0.      
-           stage1_no(1:sizerun) =  0.
-           stage2_no(1:sizerun) =  0.
-           stage3_no(1:sizerun) =  0.
-           stage4_no(1:sizerun) =  0.
-           stage5_no(1:sizerun) =  0.
-           out_no(1:sizerun) =  0.
-           species_avgwt(1:sizerun) =  0.    
-          ! IF (ironday == 45) THEN
-          !    ironday = 135
-          ! ELSE IF (ironday == 135) THEN
-          !    ironday = 225
-          ! ELSE IF (ironday == 225) THEN
-          !   ironday = 45
-          ! END IF
-          ! IF (ironday == 221) THEN
-          !    ironday = 0
-          ! END IF
-!     PRINT "(A)","DONE"
-!     PRINT "(A)","ironday"
-!     PRINT *,ironday
-   !  WRITE(147,100)REAL(molt_wt(1:sizerun))
-   !  WRITE(149,100)REAL(avg_wt(1:sizerun))
-   !  WRITE(151,100)REAL(urea_cop(1:sizerun))
-   !  WRITE(153,100)REAL(urea_fla(1:sizerun))
-   !  WRITE(155,100)REAL(PO_flux(1:sizerun))
-   !  WRITE(157,100)REAL(NO_flux(1:sizerun))
-   !  WRITE(159,100)REAL(fratio(1:sizerun))
-   !  WRITE(129,100)REAL(stage1_n(1:sizerun)),REAL(stage2_n(1:sizerun)),REAL(stage3_n(1:sizerun)),REAL(stage4_n(1:sizerun)),REAL(stage5_n(1:sizerun)),REAL(stage6_n(1:sizerun))
+     NO_o(1:sizerun) = 0.
+     nano_ml(1:sizerun) = 0.
+     diatom_ml(1:sizerun) = 0.
+     zmicro_ml(1:sizerun) = 0.
+     copepod_ml(1:sizerun) =0.
+     NPP_ml(1:sizerun) = 0.
+     PN_ml(1:sizerun) =0.
+     DN_ml(1:sizerun) =0.
+     NO_ml(1:sizerun) =0.
+     NH_ml(1:sizerun) =0.
+     SPN_ml(1:sizerun) = 0.
+     T2nano_ml(1:sizerun) = 0.
+     T2diatom_ml(1:sizerun) = 0.
+     T2zmicro_ml(1:sizerun) = 0.
+     Thalfnano_ml(1:sizerun) = 0.
+     Thalfdiatom_ml(1:sizerun) = 0.
+     Thalfzmicro_ml(1:sizerun) = 0.
+     PONflux200(1:sizerun) = 0.
+     PONflux100(1:sizerun) = 0.
+     PONfluxml(1:sizerun) = 0.
+     NOflux200(1:sizerun) = 0.
+     NOfluxml(1:sizerun) = 0.
+     NOflux100(1:sizerun) = 0.
+     NHflux200(1:sizerun) = 0.
+     NHfluxml(1:sizerun) = 0.
+     NHflux100(1:sizerun) = 0.
+     feacalml(1:sizerun) = 0.
+     ureac(1:sizerun) = 0.
+     ureaf(1:sizerun) = 0.
+     migrateflux(1:sizerun) = 0.
+     copepod_150(1:sizerun) = 0.
+     NH_150(1:sizerun) = 0.
+     NO_150(1:sizerun) = 0.
+     PN_150(1:sizerun) = 0.
+     DN_150(1:sizerun) = 0.
+     PN_100(1:sizerun) = 0.
+     DN_100(1:sizerun) = 0.
+     nano_e(1:sizerun) = 0.
+     diatom_e(1:sizerun) = 0.
+     PN_e(1:sizerun) = 0.
+     DN_e(1:sizerun) = 0.
+     NO_e(1:sizerun) =0.
+     NH_e(1:sizerun) =0.
+     NOup_e(1:sizerun) =0.
+     NHup_e(1:sizerun) =0.
+     NOup_ml(1:sizerun) =0.
+     NHup_ml(1:sizerun) =0.
+     fratio_e(1:sizerun) = 0.
+     fratio_ml(1:sizerun) = 0.
+     NPP_e(1:sizerun) = 0.
+     NPP_80(1:sizerun) = 0.
+     ngrow_o(1:sizerun) = 0.
+     dgrow_o(1:sizerun) = 0.
+     ngrow_ml(1:sizerun) = 0.
+     dgrow_ml(1:sizerun) = 0.
+     zgrazen_ml(1:sizerun) = 0.
+     cgrazed_ml(1:sizerun) = 0.
+     cgrazez_ml(1:sizerun) = 0.
+     cgrazed2_ml(1:sizerun) = 0.
+     ngrow_e(1:sizerun) = 0.
+     dgrow_e(1:sizerun) = 0.
+     euph_new(1:sizerun) = 0.
+     hm_new(1:sizerun) = 0.
+     hm_g(1:sizerun) = 0
+     euph_g(1:sizerun) = 0
+     D3_ml(1:sizerun) = 0.
+     D3_200(1:sizerun) = 0.
+     NO_200(1:sizerun) = 0.
+     NH_200(1:sizerun) = 0.
+     PN_200(1:sizerun) = 0.         
+     species_b(1:sizerun) =  0.
+     species_mwt(1:sizerun) = 0.
+     species_mwt_o(1:sizerun) = 0.      
+     stage1_no(1:sizerun) =  0.
+     stage2_no(1:sizerun) =  0.
+     stage3_no(1:sizerun) =  0.
+     stage4_no(1:sizerun) =  0.
+     stage5_no(1:sizerun) =  0.
+     out_no(1:sizerun) =  0.
+     species_avgwt(1:sizerun) =  0.    
+     ! IF (ironday == 45) THEN
+     !    ironday = 135
+     ! ELSE IF (ironday == 135) THEN
+     !    ironday = 225
+     ! ELSE IF (ironday == 225) THEN
+     !   ironday = 45
+     ! END IF
+     ! IF (ironday == 221) THEN
+     !    ironday = 0
+     ! END IF
+     !     PRINT "(A)","DONE"
+     !     PRINT "(A)","ironday"
+     !     PRINT *,ironday
+     !  WRITE(147,100)REAL(molt_wt(1:sizerun))
+     !  WRITE(149,100)REAL(avg_wt(1:sizerun))
+     !  WRITE(151,100)REAL(urea_cop(1:sizerun))
+     !  WRITE(153,100)REAL(urea_fla(1:sizerun))
+     !  WRITE(155,100)REAL(PO_flux(1:sizerun))
+     !  WRITE(157,100)REAL(NO_flux(1:sizerun))
+     !  WRITE(159,100)REAL(fratio(1:sizerun))
+     !  WRITE(129,100)REAL(stage1_n(1:sizerun)),REAL(stage2_n(1:sizerun)),REAL(stage3_n(1:sizerun)),REAL(stage4_n(1:sizerun)),REAL(stage5_n(1:sizerun)),REAL(stage6_n(1:sizerun))
      !WRITE(131,100)REAL(stage1_f),REAL(stage2_f),REAL(stage3_f),REAL(stage4_f),REAL(stage5_f)
-    ! WRITE(133,100)REAL(Ntot_avg(1:sizerun))
-    ! WRITE(135,100)REAL(nano_mar),REAL(diatom_mar),REAL(zmicro_mar),REAL(copepod_mar),REAL(NO_mar),REAL(NH_mar),REAL(don_mar),REAL(pon_mar)     
-    ! WRITE(136,100)REAL(nano_jun),REAL(diatom_jun),REAL(zmicro_jun),REAL(copepod_jun),REAL(NO_jun),REAL(NH_jun),REAL(don_jun),REAL(pon_jun)
-    ! WRITE(137,100)REAL(nano_sep),REAL(diatom_sep),REAL(zmicro_sep),REAL(copepod_sep),REAL(NO_sep),REAL(NH_sep),REAL(don_sep),REAL(pon_sep)
-    ! WRITE(138,100)REAL(nano_dec),REAL(diatom_dec),REAL(zmicro_dec),REAL(copepod_dec),REAL(NO_dec),REAL(NH_dec),REAL(don_dec),REAL(pon_dec)
-   !  WRITE(140,100)REAL(wt_stage1),REAL(wt_stage2),REAL(wt_stage3),REAL(wt_stage4),REAL(wt_stage5)
-    ! WRITE(142,100)REAL(Ntot_avg(1:sizerun)), REAL(stage6_n(1:sizerun)),REAL( n_loss(1:sizerun))  !copeod_no.dat
-    ! WRITE(144,100)REAL(nano_zML(1:sizerun)),REAL(nano_zo(1:sizerun)),REAL(micro_zML(1:sizerun)),REAL(micro_zo(1:sizerun))
-    ! WRITE(145,100)REAL(NPPn(1:sizerun)),REAL(NPPn_o(1:sizerun)),REAL(NPPd(1:sizerun)),REAL(NPPnd_o(1:sizerun))
+     ! WRITE(133,100)REAL(Ntot_avg(1:sizerun))
+     ! WRITE(135,100)REAL(nano_mar),REAL(diatom_mar),REAL(zmicro_mar),REAL(copepod_mar),REAL(NO_mar),REAL(NH_mar),REAL(don_mar),REAL(pon_mar)     
+     ! WRITE(136,100)REAL(nano_jun),REAL(diatom_jun),REAL(zmicro_jun),REAL(copepod_jun),REAL(NO_jun),REAL(NH_jun),REAL(don_jun),REAL(pon_jun)
+     ! WRITE(137,100)REAL(nano_sep),REAL(diatom_sep),REAL(zmicro_sep),REAL(copepod_sep),REAL(NO_sep),REAL(NH_sep),REAL(don_sep),REAL(pon_sep)
+     ! WRITE(138,100)REAL(nano_dec),REAL(diatom_dec),REAL(zmicro_dec),REAL(copepod_dec),REAL(NO_dec),REAL(NH_dec),REAL(don_dec),REAL(pon_dec)
+     !  WRITE(140,100)REAL(wt_stage1),REAL(wt_stage2),REAL(wt_stage3),REAL(wt_stage4),REAL(wt_stage5)
+     ! WRITE(142,100)REAL(Ntot_avg(1:sizerun)), REAL(stage6_n(1:sizerun)),REAL( n_loss(1:sizerun))  !copeod_no.dat
+     ! WRITE(144,100)REAL(nano_zML(1:sizerun)),REAL(nano_zo(1:sizerun)),REAL(micro_zML(1:sizerun)),REAL(micro_zo(1:sizerun))
+     ! WRITE(145,100)REAL(NPPn(1:sizerun)),REAL(NPPn_o(1:sizerun)),REAL(NPPd(1:sizerun)),REAL(NPPnd_o(1:sizerun))
   END IF
 
-!  IF (year == 1969 .AND. day /= ironday + 9 ) THEN
-!     c_cnt(day) = c_cnt(day) + 1
-!     c_biomass_150 = 0.
-!     DO jj = 1,g_150 
-!        IF (jj < g_150) THEN
-!           c_biomass_150 = c_biomass_150 + species(1)%Z%new(jj)*species(1)%avg_wt*grid%i_space(jj) 
-!        ELSE
-!           c_biomass(day) = c_biomass(day) + (c_biomass_150+species(1)%Z%new(jj)*&
-!                species(1)%avg_wt*grid%i_space(jj)/2.)/depth150%size + &
-!                Zoo(1)%molt_wt(0)*Cevent(1)%nauplii/depth150%size*micro%M_z
-!        END IF
-!     END DO
-!  ELSE IF (day == ironday + 9) THEN
- !    c_biomass(1:365) = c_biomass(1:365)/c_cnt(1:365)
-!     WRITE(116,100)REAL(c_biomass(1:365))
-!  END IF
+  !  IF (year == 1969 .AND. day /= ironday + 9 ) THEN
+  !     c_cnt(day) = c_cnt(day) + 1
+  !     c_biomass_150 = 0.
+  !     DO jj = 1,g_150 
+  !        IF (jj < g_150) THEN
+  !           c_biomass_150 = c_biomass_150 + species(1)%Z%new(jj)*species(1)%avg_wt*grid%i_space(jj) 
+  !        ELSE
+  !           c_biomass(day) = c_biomass(day) + (c_biomass_150+species(1)%Z%new(jj)*&
+  !                species(1)%avg_wt*grid%i_space(jj)/2.)/depth150%size + &
+  !                Zoo(1)%molt_wt(0)*Cevent(1)%nauplii/depth150%size*micro%M_z
+  !        END IF
+  !     END DO
+  !  ELSE IF (day == ironday + 9) THEN
+  !    c_biomass(1:365) = c_biomass(1:365)/c_cnt(1:365)
+  !     WRITE(116,100)REAL(c_biomass(1:365))
+  !  END IF
 
 END SUBROUTINE write_biological_sog
 
