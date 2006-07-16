@@ -21,7 +21,6 @@ subroutine write_physical_sog(unow, vnow, euphotic)
   double precision :: sal(6), dsal(6)
 
 100 format(1X, E15.8)
-200 format(1X, I10)
 
   nsal = 6
   sal(1) = 28.75
