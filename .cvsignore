@@ -1,0 +1,8 @@
+*.mod
+.RunLogOptions
+.gdb_history
+ChangeLog
+SOG
+fort.*
+output
+profiles
