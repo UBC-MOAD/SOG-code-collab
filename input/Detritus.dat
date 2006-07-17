@@ -1,0 +1,26 @@
+0.23 2.3148e-05 0.
+0.77 8e-7 1.157e-5
+
+pa=.02, pb=0.92, schneider, estern north pacific.
+vb=1.157e-5 is 1m/day (waite, bienfang,harrison)
+ra=1.7e-5 w. harrison, saanich inlet (but use this as source, he refers to values as low as 0.2/day
+ra=0.2/day, debby ianson=2.31e-6/sec
+rb=8e-7 jeffery... 
+
+!0.8 0.2 40.D-07 0.
+!0.0 0.8 8.D-07  5.7D-04
+
+!  DO xx = 1, D_bins
+!     READ(43,*) waste%m%destiny(xx),Detritus(xx)%r,Detritus(xx)%v
+!  END DO
+
+!5.8D-07 (Fasham 0.05 day^-1)
+!5.7D-05 (Fasham 5 m/day).  try 50 m/day
+
+!!!!the velocity I'm using is quite high.  Should be between 7 and 18 m/day (or 8D-5 to 2D-04) 
+(consistent with estimates from Dune et al. (1997) and Bacon et al. (1996) of 2 to 20 m per day.
+!based on remineralization length scale (Denman and Pena)
+!
+Remineralization length scale is velocity/remineralization which is useful for $\Db$ at depth where there is no source.  From drifting traps at depth, Denman and Pena find in Feb, May, and August, 100, 210, and 260m respectively.  Fasham uses a $re = 0.05$ per day for remineralization of  fecal pellets which is half of Denman and Doney (1996) $0.1$ per day who include dissolved and non-sinking particulates.  I use $0.07$ per day for $\Db$ and $0.3$ per day for non-sinking. Thus for sinking rate I have between 7 m per day and 18 m per day according to the remineralization length scale.   Greater than half the organic material should not sink, according to Clegg and Whitfield, 1990 and Charette et al (Denman and Pena,)
+!try 0.035 per day for particulates ==> velocities of 3.5 m per day to 9 m per day  (1.D-04)
+!try 0.17 per day for suspended
