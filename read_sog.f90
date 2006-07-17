@@ -21,11 +21,17 @@ subroutine read_sog
   integer :: ndays, ic, j, il, jl, iu, ju, para, stn, yr, check
   real :: idu,idl
 
+  ! *** Should be able to replace this external statment with uses of
+  ! corresponding modules **
   external y_jday_t, Julian_day  
 
-  !  First read the wind
-  yr=year_o   !this is so the actual year does not change to the last data year read when the data is read
-
+  ! Read the wind data
+  ! Preserve the value of year_o so the actual year does not change 
+  ! to the last data year read when the data is read 
+  ! ***huh?
+  yr=year_o
+  ! *** Name of the wind data file should be moved to the run 
+  ! *** parameters file **
   open(unit = 12, file = "input/wind/SH200123456_rot.dat", &
        status = "OLD", action = "READ")
   !OPEN(UNIT = 12,FILE = "input/wind/wtwice.dat",STATUS = "OLD", &
@@ -33,62 +39,61 @@ subroutine read_sog
   do xx = 1, wind_n   !one year of wind data
      read(12, *) wind(xx)%day, wind(xx)%month, wind(xx)%year, wind(xx)%time, &
           wind(xx)%zonal, wind(xx)%meridional
-
-     DO yy = 1, SIZE(leap_year,1)
-        IF (wind(xx)%year == leap_year(yy)) THEN
+     ! Adjust for leap years
+     do yy = 1, size(leap_year, 1)
+        if (wind(xx)%year == leap_year(yy)) then
            wind(xx)%leap = 1
-           EXIT
-        ELSE IF (yy == SIZE(leap_year,1)) THEN
+           exit
+        else if (yy == size(leap_year,1)) then
            wind(xx)%leap = 0
-        END IF
-     END DO
-  END DO
+        end if
+     end do
+  end do
   close(12)
-
-  ! Find Julian day 
-  ! *** But it's not really Julian day, just year-day
+  ! Calculate the year-day (erroneously called Julian day) from the
+  ! calendar dates read from the wind data file
+  ! *** Change Julian day a less deceiving name (year_day?) and replace
+  ! *** the Julian_day subroutine with a more robust algorithm **
   CALL Julian_day(wind%leap, wind%month, wind%day, wind%Jday, wind_n) 
 
-
-  !------second read the cloud fraction---------------------------------------
-
-  open (12,file="input/met/yvr/cf200123456.dat",STATUS = "OLD", &
-       ACTION = "READ")
+  ! Read the cloud fraction data
+  ! *** Name of the cloud faction wind data file should be moved to the 
+  ! *** run parameters file **
+  open(12, file="input/met/yvr/cf200123456.dat", &
+       status = "OLD", action = "READ")
   !  open (12,file="input/met/yvr/c9.dat",STATUS = "OLD", &
   !     ACTION = "READ")
-
+  ! *** This appears to be some number of year days ~(5.25 * 365)
+  ! *** Should be defined elsewhere, or better, calculated from the data read
   ndays = 1919
-
-  do ic=1,ndays
-     read (12,*) stn,year,month,day,para,(cf(ic,j),j=1,24)
+  do ic = 1, ndays
+     read(12, *) stn, year, month, day, para, (cf(ic,j),j=1,24)
   enddo
-
-
-
-  do ic=1,ndays
-     do j=1,24
-        if (cf(ic,j).lt.-100) then
+  close (12)
+  ! Interpolate data to fill in missing observations
+  ! *** This code is used several places, s/b a subroutine
+  do ic = 1, ndays
+     do j = 1, 24
+        if (cf(ic,j) < -100) then
            idl = 0
            idu = 0
            il = ic
            jl = j
-           do while (cf(il,jl).lt.0)
-              call stepdown (il,jl)
+           do while (cf(il,jl) < 0)
+              call stepdown(il, jl)
               idl = idl + 1
               !                  write (*,*) il,jl,cf(il,jl),' cf'
            enddo
            iu = ic
            ju = j
-           do while (cf(iu,ju).lt.0)
-              call stepup(iu,ju)
+           do while (cf(iu,ju) < 0)
+              call stepup(iu, ju)
               idu = idu + 1
            enddo
-           cf(ic,j) = (idu*cf(il,jl)+idl*cf(iu,ju))/(idu+idl)
+           cf(ic,j) = (idu * cf(il,jl) + idl * cf(iu,ju)) / (idu + idl)
         endif
      enddo
   enddo
-
-  close (12)
 
 
   !---third read the temperature-----------------------------------------
