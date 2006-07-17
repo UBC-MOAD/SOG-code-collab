@@ -7,6 +7,8 @@ module initial_sog
 
   implicit none
 
+  ! This appears to be a collection of parameters of the Large, et al KPP
+  ! model.  Why are they declared here?
   DOUBLE PRECISION, PARAMETER::To = 5. +273.15, & !!Large1996, &!22.000 + 273.15000   
        So = 32.70, & ! Large199635.0 !32.8, &!PSU  !32.70 Large1996
        Uo = 0.0,     & ! m/s
@@ -39,6 +41,7 @@ module initial_sog
        NOd = 0.52, &
        NHo = .5D-3 
 
+  ! This can go into initial_mean, I think
   character*80	str1	
 
 contains
@@ -58,7 +61,7 @@ contains
 
     integer :: i, j      ! loop index
     integer :: ii, imax  ! unused loop indices
-    ! Get rid of this hard-coded dimension!
+    ! *** Get rid of this hard-coded dimension!
     double precision, dimension (3854) :: NN
     ! Place holders for reading CTD data file
     integer :: dum1
@@ -74,25 +77,19 @@ contains
 
     !-----detritus loop added march 2006---------------------------------
 
-    OPEN(UNIT = 44, FILE = "input/initial_Detritus.dat",STATUS = "OLD", &
-         ACTION = "READ")
+    open(UNIT=44, FILE="input/initial_Detritus.dat", STATUS="OLD", &
+         ACTION="READ")
+    do i = 1, d%M + 1
+       read(44, *) Detritus(1)%D%new(i), Detritus(2)%D%new(i)
+    end do
+    close(44)
 
-    DO i = 1, d%M+1
-       READ (44,*) Detritus(1)%D%new(i),Detritus(2)%D%new(i)
-    END DO
-
-    CLOSE(44)
-
-
-    OPEN(UNIT = 49, FILE = "input/NH4.dat",STATUS = "OLD", &
-         ACTION = "READ")
-
-    DO i = 1, d%M+1
-       READ (49,*) Ni%H%new(i)
-    END DO
-
-    CLOSE(49)
-
+    open(unit=49, file="input/NH4.dat", status="OLD", &
+         action="READ")
+    do i = 1, d%M + 1
+       read(49, *) Ni%H%new(i)
+    end do
+    close(49)
 
     !             DO i = 1, D_bins
     !                 IF (i < D_bins) THEN
@@ -159,16 +156,20 @@ contains
 
     !---end biology------------------------------------------ 
 
-    open (5,file="infile")
-
-    str1=getpars("ctd_in",1)
-
-    OPEN (46,file=str1,STATUS="OLD")
-    do i=1,d%M+1
-       read (46,*) dum1,depth,Ti%new(i),dumc,Pi%micro%new(i),dumt,dump,dumo,Si%new(i)   
-       Ti%new(i) = Ti%new(i)+273.15
+    open(5, file="infile")
+    str1=getpars("ctd_in", 1)
+    open(46, FILE=str1, STATUS="OLD")
+    ! *** Maybe rework this so we can read orginal (not stripped) CTD
+    ! *** data files?
+    do i = 1, d%M + 1
+       read(46, *) dum1, depth,Ti%new(i), dumc, Pi%micro%new(i), &
+            dumt, dump, dumo, Si%new(i)  
+       ! *** Maybe we should have a degC2degK function? 
+       Ti%new(i) = Ti%new(i) + 273.15
+       ! *** Does the next line actually do anything?
        Pi%micro%new(i) = Pi%micro%new(i)
     enddo
+    close(46)
 
     Ti%new(0) = Ti%new(1)  !Surface
     Si%new(0) = Si%new(1)  !Boundary
@@ -178,28 +179,24 @@ contains
 
     ! assuming dz = 0.5
     ! Interpolate CTD data values for grid points between measurements?
-    do i = d%M+1, 2, -1
+    do i = d%M + 1, 2, -1
        j = i / 2
        if (j * 2 == i) then
           Ti%new(i) = Ti%new(j)
           Si%new(i) = Si%new(j)
           Pi%micro%new(i) = Pi%micro%new(j)
        else
-          ! This looks like a job for a arith_mean function
+          ! *** This looks like a job for a arith_mean function
           Ti%new(i) = Ti%new(j) * 0.5 + Ti%new(j+1) * 0.5
           Si%new(i) = Si%new(j) * 0.5 + Si%new(j+1) * 0.5
           Pi%micro%new(i) = Pi%micro%new(j) * 0.5 + Pi%micro%new(j+1) * 0.5
        endif
     enddo
 
-
     hi = hm  !Large1996 !ho 
 
-
-    close(46)
     !If the bottom fluxes are fixed, use the following 
     !tp reevaluate M+1 values:
-
     Vi%new(0) = Vi%new(1)  !Conditions
     Ui%new(0) = Ui%new(1)
 
@@ -213,38 +210,38 @@ contains
 
     !PON%new(1:M) = Pi%micro%new(1:M)+ Detritus(1)%D%new(1:M)+ Detritus(2)%D%new(1:M)
 
-  END SUBROUTINE initial_mean
-
-  character*80 function getpars(name,flag)
-
-    character*(*)	name
-    integer		flag
-
-    integer		lnblnk
-
-    character	label*16, s*80, desc*50
+  end subroutine initial_mean
 
 
-    read(5,*) label, s, desc
+  character*80 function getpars(name, flag)
+    ! Part of an input processor originated by Joe Tam
+    ! *** Move this into a new, real input processor
 
-    if (name .ne. label) then
-       print*, "GETPARS: Expecting ", name, " but got ", label(1:lnblnk(label))
+    ! Arguments:
+    character*(*) :: name  ! Name of data item to read
+    integer :: flag        ! Echo description and value read if non-zero
+
+    ! Return value:
+    character ::  s*80
+
+    ! Local variables:
+    character :: label*16, desc*50
+
+    ! Read and validate data item
+    read(5, *) label, s, desc
+    if (name /= label) then
+       print *, "!!! Error: getpars(): ", &
+            "Expecting ", name, " but got ", label(1:len_trim(label))
        stop
     end if
 
+    ! Echo description and value, if requested
     if (flag .ne. 0) then
-       write(*,'(a50," = ",a)') desc(1:lnblnk(desc)), s(1:lnblnk(s))
-
+       write(*,'(a50," = ",a)') desc(1:len_trim(desc)), s(1:len_trim(s))
+       ! *** Value only returned if flag is non-zero ???
        getpars = s
-
        return
     end if
   end function getpars
 
-
-END MODULE initial_sog
-
-
-
-
-
+end module initial_sog
