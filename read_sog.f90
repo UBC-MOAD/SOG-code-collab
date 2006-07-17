@@ -57,17 +57,15 @@ subroutine read_sog
   CALL Julian_day(wind%leap, wind%month, wind%day, wind%Jday, wind_n) 
 
   ! Read the cloud fraction data
-  ! *** Name of the cloud faction wind data file should be moved to the 
+  ! *** Name of the cloud faction data file should be moved to the 
   ! *** run parameters file **
   open(12, file="input/met/yvr/cf200123456.dat", &
        status = "OLD", action = "READ")
-  !  open (12,file="input/met/yvr/c9.dat",STATUS = "OLD", &
-  !     ACTION = "READ")
   ! *** This appears to be some number of year days ~(5.25 * 365)
   ! *** Should be defined elsewhere, or better, calculated from the data read
   ndays = 1919
   do ic = 1, ndays
-     read(12, *) stn, year, month, day, para, (cf(ic,j),j=1,24)
+     read(12, *) stn, year, month, day, para, (cf(ic,j), j = 1, 24)
   enddo
   close (12)
   ! Interpolate data to fill in missing observations
@@ -95,20 +93,21 @@ subroutine read_sog
      enddo
   enddo
 
-
-  !---third read the temperature-----------------------------------------
-
-  open (12,file="input/met/yvr/temp200123456.dat",STATUS = "OLD", &
-       ACTION = "READ")
-
-  do ic=1,ndays
-     read (12,*) stn,year,month,day,para,(atemp(ic,j),j=1,24)
+  ! Read the air temperature data
+  ! *** Name of the air temperature data file should be moved to the 
+  ! *** run parameters file **
+  open(12, file="input/met/yvr/temp200123456.dat", &
+       status = "OLD", action = "READ")
+  do ic = 1, ndays
+     read(12, *) stn, year, month, day, para, (atemp(ic,j), j = 1, 24)
      !         write (*,*) day
   enddo
-
-  do ic=1,ndays
-     do j=1,24
-
+  close(12)
+  ! *** Should confirm that dates are in sync with wind data **
+  ! Interpolate temperature data to fill in missing observations
+  ! *** This code is used several places, s/b a subroutine
+  do ic = 1, ndays
+     do j = 1, 24
         if (atemp(ic,j).lt.-100) then
            idl = 0
            idu = 0
@@ -117,7 +116,6 @@ subroutine read_sog
            do while (atemp(il,jl).lt.0)
               call stepdown (il,jl)
               idl = idl + 1
-              !                  write (*,*) il,jl,atemp(il,jl)
            enddo
            iu = ic
            ju = j
@@ -129,25 +127,27 @@ subroutine read_sog
         endif
      enddo
   enddo
-  do ic=1,ndays
-     do j=1,24
-        atemp(ic,j) = atemp(ic,j)/10.+273.15
-        !            write (*,*) atemp(ic,j)
+  ! Take out the times 10 scaling of the raw temperature data and
+  ! convert temperatures from Celius to Kelvin
+  ! *** We need a C2K() utility function
+  do ic = 1, ndays
+     do j = 1, 24
+        atemp(ic,j) = atemp(ic,j) / 10. + 273.15
      enddo
   enddo
-  close (12)
 
-  !---fourth read the humidity--------------------------------------------
-
-  open (12,file="input/met/yvr/hum200123456.dat",STATUS = "OLD", &
-       ACTION = "READ")
-
-
-  do ic=1,ndays
-     read (12,*) stn,year,month,day,para,(humid(ic,j),j=1,24)
-     !write (*,*) year,month,day,humid(ic,1)
+  ! Read air humidity data
+  ! *** Name of the humidity data file should be moved to the 
+  ! *** run parameters file **
+  open(12, file="input/met/yvr/hum200123456.dat", &
+       status = "OLD", action = "READ")
+  do ic = 1, ndays
+     read(12, *) stn, year, month, day, para, (humid(ic,j), j = 1, 24)
   enddo
-
+  close(12)
+  ! *** Should confirm that dates are in sync with wind data **
+  ! Interpolate humidity data to fill in missing observations
+  ! *** This code is used several places, s/b a subroutine
   do ic=1,ndays
      do j=1,24
         if (humid(ic,j).lt.-100) then
@@ -158,7 +158,6 @@ subroutine read_sog
            do while (humid(il,jl).lt.0)
               call stepdown (il,jl)
               idl = idl + 1
-              !write (*,*) il,jl,humid(il,jl)
            enddo
            iu = ic
            ju = j
@@ -167,42 +166,38 @@ subroutine read_sog
               idu = idu + 1
            enddo
            humid(ic,j) = (idu*humid(il,jl)+idl*humid(iu,ju))/(idu+idl)
-           !write (*,*) humid(ic,j)
         endif
      enddo
   enddo
-  close (12)
 
-  !--------Fraser River Flow---------------------------------------------
-
-  open (12,file="input/rivers/fr200123456.dat",STATUS = "OLD", &
-       ACTION = "READ")
-  !open (12,file="input/rivers/fshift.dat",STATUS = "OLD", &
-  !      ACTION = "READ")
-
-  !      do ic=1,730
-  do ic=1,1640
-     read (12,*) year,month,day,Qriver(ic)
+  ! Read Fraser River flow data
+  open(12, file="input/rivers/fr200123456.dat", &
+       status = "OLD", action = "READ")
+  ! *** Another hard-coded constant to det rid of **
+  do ic = 1, 1640
+     read(12, *) year, month, day, Qriver(ic)
   enddo
+  close(12)
 
-  !--------read Englishman river -----------------------
-
-  open (12,file="input/rivers/eng200123456.dat",STATUS = "OLD", &
-       ACTION = "READ")
-  do ic=1,1919
-     read (12,*) year,month,day,Eriver(ic)
+  ! Read Englishman River flow data
+  open(12, file="input/rivers/eng200123456.dat", &
+       status = "OLD", action = "READ")
+  ! *** Another hard-coded constant to det rid of **
+  do ic = 1, 1919
+     read(12, *) year, month, day, Eriver(ic)
   enddo
+  close(12) 
 
-  close (12) 
-
-  !---Bottom salinity condition--------------------------
-
-  OPEN(UNIT = 16,FILE = "input/CTD/bottom_200123456.dat", STATUS = "OLD", &
-       ACTION = "READ")
-
-  DO xx = 1, 1659
-     READ(16,*)ctd_bottom(xx)%sal,ctd_bottom(xx)%temp,ctd_bottom(xx)%P,ctd_bottom(xx)%No,ctd_bottom(xx)%date
-  END DO
+  ! Read bottom salinity condition data
+  ! *** Is this bottom of the model domain, or bottom of the Strait?
+  open(unit=16, file="input/CTD/bottom_200123456.dat", &
+       status = "OLD", action = "READ")
+  ! *** Another hard-coded constant to det rid of **
+  do xx = 1, 1659
+     read(16, *) ctd_bottom(xx)%sal, ctd_bottom(xx)%temp, ctd_bottom(xx)%P, &
+          ctd_bottom(xx)%No, ctd_bottom(xx)%date
+  end do
+  close(16)
 
   !---total light with depth (jerlov)--------------------------
 
@@ -251,18 +246,18 @@ subroutine read_sog
   !-----------------------
 
 
-  OPEN(UNIT = 43, FILE = "input/Detritus.dat",STATUS = "OLD",&
-       ACTION = "READ")
-
+  ! Read detritus model parameters
+  ! *** Name of the detritus parameters file should be moved to the 
+  ! *** run parameters file **
+  open(unit=43, file="input/Detritus.dat", &
+       status="OLD", action="READ")
   waste%m%destiny = 0.
-  DO xx = 1, D_bins-1
-     READ(43,*) waste%m%destiny(xx),Detritus(xx)%r,Detritus(xx)%v
-  END DO
-  waste%m%destiny(0) = 1.-waste%m%destiny(1)-waste%m%destiny(2)
+  do xx = 1, D_bins - 1
+     read(43, *) waste%m%destiny(xx), Detritus(xx)%r, Detritus(xx)%v
+  end do
+  waste%m%destiny(0) = 1. - waste%m%destiny(1) - waste%m%destiny(2)
 
-  !-----------------------------------------------
-
-END SUBROUTINE read_sog
+end subroutine read_sog
 
 !------------------------------------------------------------
 subroutine stepdown (il, jl)
