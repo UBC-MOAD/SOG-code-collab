@@ -1,12 +1,16 @@
-SUBROUTINE allocate1(STAT)
+! $Id$
+! $Source$
 
-      USE mean_param
-      USE declarations
-      USE surface_forcing
+subroutine allocate1(STAT)
 
-      IMPLICIT NONE
+      use mean_param
+      use declarations
+      use surface_forcing
+
+      implicit none
      
-      INTEGER, DIMENSION(20), INTENT(OUT)::STAT
+      ! Argument:
+      integer, dimension(20), intent(OUT)::STAT
 
       ALLOCATE(U%new(0:M+1),U%old(0:M+1),U%old_old(0:M+1),U%last(0:M+1),V%new(0:M+1),V%old(0:M+1),&
                V%old_old(0:M+1),V%last(0:M+1),&
@@ -123,7 +127,6 @@ SUBROUTINE allocate1(STAT)
           dgraz_dec(M),dgraz_sep(M),NOup_mar(M),NOup_sep(M),NOup_jun(M),NOup_dec(M),NHup_mar(M),&
           NHup_jun(M),NHup_sep(M),NHup_dec(M),&
           fratio_mar(M),fratio_jun(M),fratio_dec(M),fratio_sep(M),&
-          T_mar(M),T_jun(M),T_sep(M),T_dec(M),S_mar(M),S_jun(M),S_sep(M),S_dec(M),&
           U_mar(M),U_dec(M),U_sep(M),U_jun(M),V_mar(M),V_jun(M),V_sep(M),V_dec(M),&
           Ku_mar(M),Ku_jun(M),Ku_sep(M),Ku_dec(M),&
           Ks_mar(M),Ks_dec(M),Ks_sep(M),Ks_jun(M),Kt_mar(M),Kt_dec(M),Kt_sep(M),&
