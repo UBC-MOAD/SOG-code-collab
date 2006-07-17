@@ -9,10 +9,9 @@ subroutine find_new
 
   implicit none
 
-  ! *** These are not used here
-  external gammq, rtnewt
+  ! *** This is not used here
+  external gammq
   real :: gammq
-  double precision :: rtnewt
 
   ! Local variables:
   ! *** though lots of them are unused
