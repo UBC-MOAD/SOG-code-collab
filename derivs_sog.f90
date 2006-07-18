@@ -41,10 +41,6 @@ subroutine derivs_sog(x_var, nvar1, Y_var, DYDX_deriv, Temp)
   waste%medium = 0.
   N%remin = 0.
 
-
-  bottom = 100.  !integrate rate of urea production over top 100 m
-  bottom2 = 40.  
-
   CALL p_growth(Yplus,Yplus(1:M),nvar1,I_par,grid,N,micro,Temp,Resp) !microplankton
   !      waste%medium = waste%medium + micro%M_z*Yplus(1:M)
   waste%medium = waste%medium + Resp(M+1:2*M)*Yplus(1:M)
@@ -103,10 +99,20 @@ subroutine derivs_sog(x_var, nvar1, Y_var, DYDX_deriv, Temp)
 
   PO_deriv(1:M) = DYDX_deriv(1:M)
 
-  CALL sum_g(grid,DYDX_deriv(M+1:2*M),bottom2,NO50_rate)  !in top 5 meters
-  CALL sum_g(grid,PO_deriv(1:M),bottom2,PO50_rate)          !in top 5 meters
-
-  !      CALL sum_g(grid,DYDX_deriv(M+1:2*M),bottom,NO100_rate)  !in top 5 meters
-  !      CALL sum_g(grid,PO_deriv(1:M),bottom,PO100_rate)          !in top 5 meters
+  ! Integrate rate of urea production
+  ! *** More hard-coded constants to get rid of
+  ! *** These refer to the depth of the model domain and have caused
+  ! *** trouble with index out of bounds runtime errors in sum_g()
+  ! In the top 5 meters
+  bottom = 5.  
+  call sum_g(grid, DYDX_deriv(M+1:2*M), bottom, NO50_rate)
+  call sum_g(grid, PO_deriv(1:M), bottom, PO50_rate)
+  ! In the whole model domain
+  bottom = 40.
+  ! *** These calls produce array index out of bounds error in sum_g
+  ! *** and they may have nothing to do with phytoplankton so 
+  ! *** don't do them for now
+!!$  call sum_g(grid, DYDX_deriv(M+1:2*M), bottom, NO100_rate)
+!!$  call sum_g(grid, PO_deriv(1:M), bottom, PO100_rate)
 
 end subroutine derivs_sog
