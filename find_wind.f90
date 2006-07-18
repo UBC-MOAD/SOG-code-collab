@@ -1,5 +1,5 @@
 ! $Id$
-! $Source
+! $Source$
 
 subroutine find_wind(year, day, time, ecmapp, wind_n, unow, vnow, wind)
 ! Find the unow and vnow components of the wind at the specified 
