@@ -77,8 +77,8 @@ contains
 
     !-----detritus loop added march 2006---------------------------------
 
-    open(UNIT=44, FILE="input/initial_Detritus.dat", STATUS="OLD", &
-         ACTION="READ")
+    open(unit=44, file="input/initial_Detritus.dat", &
+         status="OLD", action="READ")
     do i = 1, d%M + 1
        read(44, *) Detritus(1)%D%new(i), Detritus(2)%D%new(i)
     end do
@@ -137,18 +137,18 @@ contains
 
 
     !               open (66,file="input/nitratetest.dat")
-    open (66,file="input/nitrate.dat")
-
-    do i=1,3854
-       read (66,*) NN(i)
+    open(unit=66, file="input/nitrate.dat", &
+         status="OLD", action="READ")
+    ! *** More hard-coded constants to get rid of!
+    do i = 1, 3854
+       read(66, *) NN(i)
     enddo
-
     close (66)
 
-    if (xx==1) then 
-       Ni%O%new=NN(1:82)
+    if (xx == 1) then 
+       Ni%O%new = NN(1:82)
     else
-       Ni%O%new=NN(82*(xx-1)+1:82*(xx-1)+82)
+       Ni%O%new = NN(82 * (xx-1) + 1:82 * (xx-1) + 82)
     endif
 
 
