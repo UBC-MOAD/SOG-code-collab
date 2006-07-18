@@ -97,8 +97,8 @@ subroutine write_physical_sog(unow, vnow, euphotic)
   !       ACTION = "WRITE")
   !  OPEN(UNIT = 153, FILE = "output/Ks_ml_hourly_20res.dat",STATUS = "REPLACE", &
   !       ACTION = "WRITE")
-  OPEN(UNIT = 154, FILE = "output/Ipar_ml_hourly_20res.dat",STATUS = "REPLACE", &
-       ACTION = "WRITE")
+!!$  OPEN(UNIT = 154, FILE = "output/Ipar_ml_hourly_20res.dat",STATUS = "REPLACE", &
+!!$       ACTION = "WRITE")
   !  OPEN(UNIT = 155, FILE = "output/time_hourly_20res.dat",STATUS = "REPLACE", &
   !       ACTION = "WRITE")
 
