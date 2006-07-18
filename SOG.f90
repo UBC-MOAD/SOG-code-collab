@@ -194,7 +194,7 @@ program SOG
 
         ! KPP uses smooth_x below but this is just set equal to 0 in input file 
         !print*,'here'
-        call find_wind(year,day,time,ecmapp,unow,vnow,wind)
+        call find_wind(year, day, time, ecmapp, wind_n, unow, vnow, wind)
         !print*,'here'
         !            write (*,*) year,day,time,ecmapp,wind_n,unow,vnow,' in SOG'
 
