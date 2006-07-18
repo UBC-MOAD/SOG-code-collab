@@ -77,7 +77,6 @@ subroutine find_wind(year, day, time, ecmapp, wind_n, unow, vnow, wind)
                 + wind(count + 1)%zonal * withinhour
            done = 1
            ecmapp = count
-           write (*,*) 'find_wind: time', count
         end if
      end if
 
