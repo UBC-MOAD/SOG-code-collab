@@ -1,9 +1,9 @@
-"writefile1"	"output/phys0506_nh4.dat"	"write file"
-"writefile2"	"output/bio0506_nh4.dat"	"write file"
-"inputfile"	"input/nov04-05.dat"		"input file"
+"writefile1"	"output/phys_shortTest.out"	"write file"
+"writefile2"	"output/bio_shortTest.out"	"write file"
+"inputfile"	"input/shortTest.dat"		"input file"
 "ctd_in"	"input/ctd_in/SG0414004.str"	"ctd file"	
-"profile_out1"	"profiles/KI_pro0506_nh4"	"profile"
-"profile_out2"	"profiles/profile0506_nh4"	"profile"
+"profile_out1"	"profiles/KI_shortTest.pro"	"profile"
+"profile_out2"	"profiles/phys_shortTest.pro"	"profile"
 
 
 "writefile1"	"output/phys0315.dat"		"write file"
