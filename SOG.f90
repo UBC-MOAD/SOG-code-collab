@@ -51,7 +51,7 @@ program SOG
   str = getpars("inputfile", 1)
   open(10, file=str, status="OLD", action="READ")
   read(10, *) M, D, lambda , t_o, t_f, dt, day_o, year_o, month_o, &
-       windyear, stormday,cruise_id
+       windyear, stormday, cruise_id
 
   steps = 1 + int((t_f - t_o) / dt) !INT rounds down
 
@@ -921,29 +921,37 @@ program SOG
 
   END DO  !main loop, ie time loop!
 
+  ! Write profiles
+131  format (13(1x,f10.4))
+  ! Quantities without initial condition value value at bottom of the
+  ! model domain (M values in the profile)
+  ! *** K, I_par
   open(5, file="infile")
   str = getpars("profile_out1", 1)
-
   open(4, file=str)
   do isusan = 0, M
      write(4, 131) K%u%all(isusan), K%s%all(isusan), I_par(isusan), &
           K%t%all(isusan)
-131  format (13(1x,f10.4))
   end do
   close(4)
 
+  ! Quantities that include an intial condition value at the bottom of the
+  ! model domain (M + 1 values in the profile)
+  ! Water temperature, *** salinity, density, micro-phytos, nitrate, ammonia,
+  ! and detritus
   open (5, file="infile")
   str = getpars("profile_out2", 1)
-
   open(6, file=str)
-  do isusan = 0, M+1
-     density%new(isusan)=density%new(isusan)-1000
+  do isusan = 0, M + 1
+     density%new(isusan) = density%new(isusan) - 1000
      write(6, 131) T%new(isusan), s%NEW(isusan), density%new(isusan), &
           P%micro%new(isusan), N%O%new(isusan), N%H%new(isusan),      &
           Detritus(1)%D%new(isusan), Detritus(2)%D%new(isusan),       &
-          Detritus(3)%D%new(isusan), f_ratio(isusan)
+          Detritus(3)%D%new(isusan)
+     ! *** Removed f_ratio, ratio of nitrate uptake to total nitrogen uptake
+     ! *** from above write, because it is dimensioned (1:M) and causes an
+     ! *** array bound error in this loop
   end do
   close(6)
 
-
-END PROGRAM SOG
+end program SOG
