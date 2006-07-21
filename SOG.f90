@@ -9,6 +9,10 @@ program SOG
   use initial_sog
   use pdf
   use IMEX_constants  
+  ! Subroutine & function modules:
+  ! (Wrapping subroutines and functions in modules provides compile-time
+  !  checking of number and type of arguments - but not order!)
+  use find_wind_mod
 
   implicit none
 
@@ -193,10 +197,9 @@ program SOG
         ! take density from grid points to interface or vice-versa
 
         ! KPP uses smooth_x below but this is just set equal to 0 in input file 
-        !print*,'here'
-        call find_wind(year, day, time, ecmapp, wind_n, unow, vnow, wind)
-        !print*,'here'
-        !            write (*,*) year,day,time,ecmapp,wind_n,unow,vnow,' in SOG'
+        ! Search and interpolate the wind data for the u and v components
+        ! of the wind at the current time step
+        call find_wind(year, day, time, ecmapp, wind_n, wind, unow, vnow)
 
         ! *** Implicit type conversion problem
         ! *** Identical statement to this above - why???
