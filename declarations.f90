@@ -123,9 +123,10 @@ module declarations
   INTEGER::M2, M3, N_ok, N_bad      
 
   !Variable for wind and insol data
-
   DOUBLE PRECISION::last_wind_u, last_wind_v
-  INTEGER::data_point_insol,data_point_ecmwf, wind_n, insol_n,smooth_x
+  INTEGER::data_point_insol,data_point_ecmwf
+  integer :: wind_n
+  integer :: insol_n, smooth_x
 
   !current data number and Size of PAPMD.60 data array Large_data(:)
 
