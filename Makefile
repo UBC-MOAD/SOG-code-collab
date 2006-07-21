@@ -40,10 +40,10 @@ CLFLAGS = -rt
 # OBJS = precision_defs.o unit_defs.o mean_param.o declarations.o         
 OBJS = mean_param.o declarations.o         \
 surface_forcing.o initial_sog.o IMEX_constants.o write_open.o           \
-allocate1.o read_sog.o	\
+allocate1.o read_sog.o find_wind.o 	\
 stability.o \
 \
-allocate2.o Julian_day.o y_jday_t.o find_wind.o initialize.o	\
+allocate2.o Julian_day.o y_jday_t.o initialize.o	\
 smoothdata.o coefficients.o define_grid.o define_sog.o	\
 alpha_sub.o Cp_sub.o density_sub.o irradiance_sog.o define_adv.o	\
 buoyancy.o interpolate.o surface_flux_sog.o fun_constants.o		\
