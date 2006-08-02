@@ -51,11 +51,11 @@ contains
 
     type(gr_d), intent(in) :: d
     type(nutrient), intent(out) :: Ni
+    integer, intent(in) :: D_bins
     type(snow), dimension(D_bins), intent(in out) :: Detritus
     type(plankton), intent(out) :: Pi 
     type(prop), intent(out) :: Ui, Vi, Ti, Si, ut,vt
     double precision, dimension(d%M), intent(out) :: pbx,pby
-    integer, intent(in) :: D_bins
     double precision, intent(out) :: hi !h%new
     integer xx           ! cruise_id
 
