@@ -1,4 +1,4 @@
- 80 40. 0.     48360. 436800. 900. 293   2004   10      1965     221      39
+ 80 40. 0.     44520. 436800. 900. 293   2004   10      1965     221      39
 ! M  D  lambda t_o    t_f     dt   day_o year_o month_o windyear stormday cruise_id
 ! M = # of grid points
 ! D = model domain depth [m]
