@@ -21,7 +21,7 @@ SUBROUTINE find_upwell(mm,w,wo,S)
 !susan's new upwelling plan, March 29, 2006
 
 !find the freshwater content
-fwc(1)=30-S(index)
+fwc(1)=30-S(1)
 DO index=2,mm%M+1
    fwc(index)=30-S(index)+fwc(index-1)
 ENDDO
