@@ -35,7 +35,7 @@ program SOG
   integer :: niter
   ! Hour of day index for cloud fraction data
   integer :: j
-  ! Variables for pressure gradient calculations
+  ! Variables for baroclinic pressure gradient calculations
   double precision :: sumu, sumv, uprev, vprev, delu, delv
   double precision :: sumpbx, sumpby, tol
   integer :: ii       ! loop index
@@ -376,8 +376,8 @@ program SOG
         !      CALL horizontal_adv(grid,Gvector%s,-P_f,density%new(1:M),1./S%new(1:M),dt)  !add salt to bottom 
         !!commented out by KC, july 20 because since P_q_fraction is 0, and define_adv is zero, P_q and P_f are zero so nothing happens in this function
 
-        CALL find_upwell(grid,wupwell,upwell,S%new)
-        !      CALL find_upwell(grid,S%new,Qriver(day),h_m,wupwell,upwell,factor,dS,U%new)
+        ! Calculate profile of upwelling velocity
+        call find_upwell(grid, wupwell, upwell, S%new)
 
         CALL define_adv_bio(grid,S%new,Gvector%s,dt,P_sa,wupwell,grid%i_space(1))  !upwell salt similar to NO      
         CALL define_adv_bio(grid,T%new,Gvector%t,dt,P_ta,wupwell,grid%i_space(1))  !upwell temp too
@@ -643,8 +643,10 @@ program SOG
            !            write (*,*) yy,dzx(yy),dzy(yy),' dzx'
         enddo
 
-        sumpbx = 0.
+        ! Calculate the baroclinic pressure gradient
+        ! *** This tolerance should be read in as a run parameter
         tol=1e-6
+        sumpbx = 0.
         cz = 0.
         ii=1
         do yy=1,M
@@ -655,7 +657,7 @@ program SOG
               pbx(yy) = pbx(yy-1)-density%new(yy)
               !               write (*,*) ii,yy,pbx(yy),cz,density%new(yy),'  **1'
            endif
-           do while ((dzx(ii)-yy) < -tol)
+           do while ((dzx(ii)-yy) < -tol .and. ii < M)
               pbx(yy) = pbx(yy) + density%new(ii)*(dzx(ii)-cz)
               cz = dzx(ii)
               !               write (*,*) ii,yy,pbx(yy),cz,density%new(ii),'  **2'
@@ -676,7 +678,7 @@ program SOG
            else
               pby(yy) = pby(yy-1)-density%new(yy)
            endif
-           do while ((dzy(ii)- yy) <-tol)
+           do while ((dzy(ii)- yy) <-tol .and. ii < M)
               pby(yy) = pby(yy) + density%new(ii)*(dzy(ii)-cz)
               cz = dzy(ii)
               ii = ii + 1
