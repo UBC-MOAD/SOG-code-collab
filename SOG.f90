@@ -4,6 +4,10 @@
 program SOG      
   ! Coupled physical and biological model of the Strait of Georgia
 
+  ! Utility modules:
+  use unit_conversions
+  use datetime
+
   use declarations
   use surface_forcing
   use initial_sog
@@ -41,6 +45,19 @@ program SOG
   integer :: ii       ! loop index
   ! Physical model domain parameter (should go elsewhere)
   double precision :: oLx, oLy, gorLx, gorLy
+  ! Loop index for writing out profile results
+  integer :: i_pro
+  ! sigma-t quantity calculated from density for profile results output
+  double precision :: sigma_t
+  ! Code identification string (maintained by CVS), for output file headers
+  character*70 :: &
+       codeId = "$Source$"
+  ! Date/time structures for output file headers
+  type(t_datetime) :: runDatetime     ! Date/time of code run
+  type(t_datetime) :: profileDatetime ! Date/time of profile
+
+  ! Get the current date/time from operating system to timestamp the run with
+  call os_datetime(runDatetime)
 
   ! Open a bunch of output files
   CALL write_open
@@ -124,7 +141,8 @@ program SOG
   h_m%new = 10.
 
 
-  DO time_step = 1, steps    !main loop of program
+  
+  do time_step = 1, steps  !---------- Beginning of the time loop ----------
 
      CALL define_sog(time_step) !!store previous time_steps in old (n) and old_old (n-1)!!     
 
@@ -921,12 +939,22 @@ program SOG
 
 
      dummy_time = dummy_time +dt
-     CALL new_year(day_time,day,year,time,dt,day_check,day_check2,month_o,data_point_papmd)
 
-
-  END DO  !main loop, ie time loop!
+     ! Increment time, calendar date and clock time, unless this is
+     ! the last time through the loop
+     if(time_step < steps) then
+        call new_year(day_time, day, year, time, dt, day_check, day_check2, &
+             month_o, data_point_papmd)
+     endif
+  end do  !--------- End of time loop ----------
 
   ! Write profiles
+  ! Calculate the month number and month day for profile headers
+  profileDatetime%yr = year
+  profileDatetime%yr_day = day
+  profileDatetime%day_sec = day_time
+  call calendar_date(profileDatetime)
+  call clock_time(profileDatetime)
 131  format (13(1x,f10.4))
   ! Quantities without initial condition value value at bottom of the
   ! model domain (M values in the profile)
@@ -940,22 +968,46 @@ program SOG
   end do
   close(4)
 
-  ! Quantities that include an intial condition value at the bottom of the
-  ! model domain (M + 1 values in the profile)
-  ! Water temperature, *** salinity, density, micro-phytos, nitrate, ammonia,
-  ! and detritus
+  ! Quantities whose grid point are in the middle of the model cells, 
+  ! and that have boundary condition values at the surface, and at the
+  ! bottom of the model domain (M + 2 values in the profile, ranging from
+  ! 0 to M + 1)
+  ! Water temperature, salinity, sigma-t, phytoplankton, nitrate, ammonia,
+  ! and detritus (remineralized, sinking, and mortality)
   open (5, file="infile")
   str = getpars("profile_out2", 1)
   open(6, file=str)
-  do isusan = 0, M + 1
-     density%new(isusan) = density%new(isusan) - 1000
-     write(6, 131) T%new(isusan), s%NEW(isusan), density%new(isusan), &
-          P%micro%new(isusan), N%O%new(isusan), N%H%new(isusan),      &
-          Detritus(1)%D%new(isusan), Detritus(2)%D%new(isusan),       &
-          Detritus(3)%D%new(isusan)
+  ! Write the profile results file header
+  write(6, 200) trim(codeId), datetime_str(runDatetime), &
+       time, datetime_str(profileDatetime)
+  ! *** Need to add a bunch of code to convert time value to calendar date
+  ! *** and clock time so that we can write *ProfileDateTime value
+200 format("! Profiles of Temperature, Salinity, Density, ",         &
+       "Phytoplankton, Nitrate, Ammonium,"/,                         &
+       "! and Detritus (remineralized, sinking, and mortality)"/,    &
+       "*FromCode: ", a/,                                            &
+       "*RunDateTime: ", a/,                                         &
+       "*FieldNames: depth, temperature, salinity, sigma-t, ",       &
+       "phytoplankton, nitrate, ammonium, remineralized detritus, ", &
+       "sinking detritus, mortality detritus"/,                      &
+       "*FieldUnits: m, deg C, None, None, uM N, uM N, uM N, ",      &
+       "uM N, uM N, uM N"/,                                          &
+       "*ProfileTime: ", f9.0/                                       &
+       "*ProfileDateTime: ", a/,                                     &
+       "*EndOfHeader")
+  ! *** Change this index to i when we know common block effects have been
+  ! *** cleaned up and i is safe to use as a local index
+  do i_pro = 0, M + 1
+     sigma_t = density%new(i_pro) - 1000.
+     ! *** We need a K2C conversion function here
+     write(6, 201) grid%d_g(i_pro), KtoC(T%new(i_pro)), S%new(i_pro),  &
+          sigma_t, P%micro%new(i_pro), N%O%new(i_pro), N%H%new(i_pro), &
+          Detritus(1)%D%new(i_pro), Detritus(2)%D%new(i_pro),          &
+          Detritus(3)%D%new(i_pro)
      ! *** Removed f_ratio, ratio of nitrate uptake to total nitrogen uptake
      ! *** from above write, because it is dimensioned (1:M) and causes an
      ! *** array bound error in this loop
+201 format(f7.3, 9(2x, f8.4))
   end do
   close(6)
 
