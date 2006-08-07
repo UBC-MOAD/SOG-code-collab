@@ -55,6 +55,10 @@ program SOG
   ! Date/time structures for output file headers
   type(t_datetime) :: runDatetime     ! Date/time of code run
   type(t_datetime) :: profileDatetime ! Date/time of profile
+  ! Temporary storage for formated datetime strings.  Needed to work around
+  ! an idiocyncracy in pgf90 that seems to disallow non-intrinsic function
+  ! calls in write statements
+  character*19 :: str_runDatetime, str_proDatetime
 
   ! Get the current date/time from operating system to timestamp the run with
   call os_datetime(runDatetime)
@@ -978,8 +982,11 @@ program SOG
   str = getpars("profile_out2", 1)
   open(6, file=str)
   ! Write the profile results file header
-  write(6, 200) trim(codeId), datetime_str(runDatetime), &
-       time, datetime_str(profileDatetime)
+  ! Avoid a pgf90 idiocyncracy by getting datetimes formatted into
+  ! string here rather than in the write statement
+  str_runDatetime = datetime_str(runDatetime)
+  str_proDatetime = datetime_str(profileDatetime)
+  write(6, 200) trim(codeId), str_runDatetime, time, str_proDatetime
   ! *** Need to add a bunch of code to convert time value to calendar date
   ! *** and clock time so that we can write *ProfileDateTime value
 200 format("! Profiles of Temperature, Salinity, Density, ",         &
