@@ -1,6 +1,0 @@
-syntax: glob
-*.mod
-*.o
-libSOG.a
-SOG
-fruit_driver
