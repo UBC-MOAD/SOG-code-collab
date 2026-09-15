@@ -11,8 +11,10 @@ on:
     types:
       - reopened
       - opened
+
 jobs:
   auto_assign:
+    name: Automatically assign issue/PR to Doug
     permissions:
       issues: write  # Required to add assignees to issues
       pull-requests: write  # Required to add assignees to pull requests
